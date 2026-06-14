@@ -1,0 +1,118 @@
+# ──────────────────────────────────────────────────────────────────────────
+# .gitignore — covers all heavy / regenerable data.
+# Versioned: code, docs, configs, scripts/libraries, exchange (AAF/XML/EDL),
+#            .drp project backups, solved cameras.
+# Ignored:   media (frames/video/geo/caches), renders, outputs, the CG library.
+# (Repo not yet initialised — prepared for a clean `git init` later.)
+# ──────────────────────────────────────────────────────────────────────────
+
+# ── IDE / tools ──
+.vscode/
+# .claude/        (tracked)
+
+# ── OS / temp ──
+.DS_Store
+Thumbs.db
+*.swp
+.tmp/
+tmp/
+
+# ── Houdini ──
+hou/backup/
+hou/geo/
+backup/
+*.hip.bak
+*.hiplc.bak
+*.hipnc.bak
+hou/scripts/ocl/hou_lib/    # vendored SideFX OCL libs (clones — not our IP, re-obtainable from Houdini)
+
+# ── Heavy folders: caches / renders / outputs / finishing ──
+**/cache/
+**/caches/
+**/render/
+**/renders/
+**/proxy/
+**/optimized/
+output/
+exports/
+deliver/
+grade/cache/
+_backup/
+
+# ── Reusable CG library (heavy — kept on storage) ──
+assets/
+
+# ── DCC app working dirs (heavy) ──
+blend/
+comfy/
+adobe/
+davinci/
+nuke/comp/            # Nuke comp renders/temp (comp scripts live in shots/<EP>/<SH>/comp)
+
+# ── Heavy media by extension (anywhere) ──
+# frames / images
+*.exr
+*.hdr
+*.dpx
+*.cin
+*.tif
+*.tiff
+*.tga
+*.tx
+*.rat
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.psd
+*.psb
+*.j2k
+*.jp2
+# video
+*.mov
+*.mp4
+*.m4v
+*.mxf
+*.avi
+*.mkv
+*.webm
+*.mpg
+*.mpeg
+*.r3d
+*.braw
+*.ari
+*.arx
+*.dng
+# geometry / volumes / caches
+*.bgeo
+*.bgeo.sc
+*.bgeo.gz
+*.geo
+*.vdb
+*.abc
+*.usd
+*.usdc
+*.usda
+*.usdz
+*.fbx
+*.obj
+*.ply
+*.stl
+*.sim
+*.bclip
+*.pc
+# audio
+*.wav
+*.aif
+*.aiff
+# archives / blobs
+*.zip
+*.rar
+*.7z
+*.blob
+
+# ── Re-include small, important interchange ──
+# solved cameras (small) stay versioned despite the geo-cache rules above
+!shots/**/cam/*.abc
+!shots/**/cam/*.usd
+!shots/**/cam/*.fbx

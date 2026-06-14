@@ -1,0 +1,634 @@
+#ifndef SD_SHAPES_2D
+    #define SD_SHAPES_2D
+
+    #include "math_utils.vfl"
+
+    // Circle - exact
+    float sdCircle( vector2 p; float r ){
+        return length(p) - r;
+    }
+    // Rounded Box - exact
+    float sdRoundedBox( vector2 p; vector2 b; vector4 _r ){
+        vector4 r = set(_r);
+        
+        vector2 rxy = set(r.x, r.y);
+        rxy = (p.x>0.0)? rxy : set(r.z, r.w);
+
+        r = set(rxy.x, rxy.y, r.z, r.w);
+        
+        // r.xy = (p.x>0.0)?r.xy : r.zw;
+        r.x  = (p.y>0.0)?r.x  : r.y;
+
+        vector2 q = abs(p)-b+r.x;
+        return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+    }
+    // Box - exact
+    float sdBox( vector2 p; vector2 b ){
+        vector2 d = abs(p)-b;
+        return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+    }
+    // Oriented Box - exact
+    float sdOrientedBox( vector2 p; vector2 a; vector2 b; float th ){
+        float l = length(b-a);
+        vector2  d = (b-a)/l;
+        vector2  q = (p-(a+b)*0.5);
+        q = set(set(d.x,-d.y),set(d.y,d.x))*q;
+        q = abs(q)-set(l,th)*0.5;
+        return length(max(q,0.0)) + min(max(q.x,q.y),0.0);    
+    }
+    // Segment - exact
+    float sdSegment( vector2 p; vector2 a; vector2 b ){
+        vector2 pa = p-a, ba = b-a;
+        float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+        return length( pa - ba*h );
+    }
+    // Rhombus - exact
+    float sdRhombus( vector2 p; vector2 b ) {
+        p = abs(p);
+        float h = clamp( ndot(b-2.0*p,b)/dot(b,b), -1.0, 1.0 );
+        float d = length( p-0.5*b*set(1.0-h,1.0+h) );
+        return d * sign( p.x*b.y + p.y*b.x - b.x*b.y );
+    }
+    // Isosceles Trapezoid - exact
+    float sdTrapezoid( vector2 p; float r1; float r2; float he ){
+        vector2 k1 = set(r2,he);
+        vector2 k2 = set(r2-r1,2.0*he);
+        p.x = abs(p.x);
+        vector2 ca = set(p.x-min(p.x,(p.y<0.0)?r1:r2), abs(p.y)-he);
+        vector2 cb = p - k1 + k2*clamp( dot(k1-p,k2)/dot2(k2), 0.0, 1.0 );
+        float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
+        return s*sqrt( min(dot2(ca),dot2(cb)) );
+    }
+    // Parallelogram - exact
+    float sdParallelogram( vector2 p; float wi; float he; float sk ){
+        vector2 e = set(sk,he);
+        p = (p.y<0.0)?-p:p;
+        vector2  w = p - e; w.x -= clamp(w.x,-wi,wi);
+        vector2  d = set(dot(w,w), -w.y);
+        float s = p.x*e.y - p.y*e.x;
+        p = (s<0.0)?-p:p;
+        vector2  v = p - set(wi,0); v -= e*clamp(dot(v,e)/dot(e,e),-1.0,1.0);
+        d = min( d, set(dot(v,v), wi*he-abs(s)));
+        return sqrt(d.x)*sign(-d.y);
+    }
+    // Equilateral Triangle - exact
+    float sdEquilateralTriangle( vector2 p; float r ){
+        float k = sqrt(3.0);
+        p.x = abs(p.x) - r;
+        p.y = p.y + r/k;
+        if( p.x+k*p.y>0.0 ) p = set(p.x-k*p.y,-k*p.x-p.y)/2.0;
+        p.x -= clamp( p.x, -2.0*r, 0.0 );
+        return -length(p)*sign(p.y);
+    }
+    // Isosceles Triangle - exact
+    float sdTriangleIsosceles( vector2 p; vector2 q ){
+        p.x = abs(p.x);
+        vector2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
+        vector2 b = p - q*set( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
+        float s = -sign( q.y );
+        vector2 d = min( set( dot(a,a), s*(p.x*q.y-p.y*q.x) ),
+                    set( dot(b,b), s*(p.y-q.y)  ));
+        return -sqrt(d.x)*sign(d.y);
+    }
+    // Triangle - exact
+    float sdTriangle( vector2 p; vector2 p0; vector2 p1; vector2 p2 ){
+        vector2 e0 = p1-p0, e1 = p2-p1, e2 = p0-p2;
+        vector2 v0 = p -p0, v1 = p -p1, v2 = p -p2;
+        vector2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );
+        vector2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );
+        vector2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );
+        float s = sign( e0.x*e2.y - e0.y*e2.x );
+        vector2 d = min(min(set(dot(pq0,pq0), s*(v0.x*e0.y-v0.y*e0.x)),
+                        set(dot(pq1,pq1), s*(v1.x*e1.y-v1.y*e1.x))),
+                        set(dot(pq2,pq2), s*(v2.x*e2.y-v2.y*e2.x)));
+        return -sqrt(d.x)*sign(d.y);
+    }
+    // Uneven Capsule - exact
+    float sdUnevenCapsule( vector2 p; float r1; float r2; float h ){
+        p.x = abs(p.x);
+        float b = (r1-r2)/h;
+        float a = sqrt(1.0-b*b);
+        float k = dot(p,set(-b,a));
+        if( k < 0.0 ) return length(p) - r1;
+        if( k > a*h ) return length(p-set(0.0,h)) - r2;
+        return dot(p, set(a,b) ) - r1;
+    }
+    // Regular Pentagon - exact
+    float sdPentagon( vector2 p; float r ){
+        vector k = set(0.809016994,0.587785252,0.726542528);
+        p.x = abs(p.x);
+        p -= 2.0*min(dot(set(-k.x,k.y),p),0.0)*set(-k.x,k.y);
+        p -= 2.0*min(dot(set( k.x,k.y),p),0.0)*set( k.x,k.y);
+        p -= set(clamp(p.x,-r*k.z,r*k.z),r);    
+        return length(p)*sign(p.y);
+    }
+    // Regular Hexagon - exact
+    float sdHexagon( vector2 p; float r ){
+        vector k = set(-0.866025404,0.5,0.577350269);
+        p = abs(p);
+        p -= 2.0*min(dot(set(k.x,k.y),p),0.0)*set(k.x,k.y);
+
+        p -= set(clamp(p.x, -k.z*r, k.z*r), r);
+        return length(p)*sign(p.y);
+    }
+    // Regular Octogon - exact
+    float sdOctogon( vector2 p; float r ){
+        vector k = set(-0.9238795325, 0.3826834323, 0.4142135623 );
+        p = abs(p);
+        p -= 2.0*min(dot(set( k.x,k.y),p),0.0)*set( k.x,k.y);
+        p -= 2.0*min(dot(set(-k.x,k.y),p),0.0)*set(-k.x,k.y);
+        p -= set(clamp(p.x, -k.z*r, k.z*r), r);
+        return length(p)*sign(p.y);
+    }
+    // Hexagram - exact
+    float sdHexagram( vector2 p; float r ){
+        vector4 k = set(-0.5,0.8660254038,0.5773502692,1.7320508076);
+        p = abs(p);
+        p -= 2.0*min(dot(set(k.x,k.y),p),0.0)*set(k.x,k.y);
+        p -= 2.0*min(dot(set(k.y,k.x),p),0.0)*set(k.y,k.x);
+
+        p -= set(clamp(p.x,r*k.z*0.5,r*k.w*0.5),r*0.5); //*0.5 added to apply as radius
+
+        return length(p)*sign(p.y);
+    }
+
+    // Pentagram - exact
+    float sdPentagram(vector2 p; float r ){
+        float k1x = 0.809016994; // cos(π/ 5) = ¼(√5+1)
+        float k2x = 0.309016994; // sin(π/10) = ¼(√5-1)
+        float k1y = 0.587785252; // sin(π/ 5) = ¼√(10-2√5)
+        float k2y = 0.951056516; // cos(π/10) = ¼√(10+2√5)
+        float k1z = 0.726542528; // tan(π/ 5) = √(5-2√5)
+        vector2  v1  = set( k1x,-k1y);
+        vector2  v2  = set(-k1x,-k1y);
+        vector2  v3  = set( k2x,-k2y);
+        
+        p.x = abs(p.x);
+        p -= 2.0*max(dot(v1,p),0.0)*v1;
+        p -= 2.0*max(dot(v2,p),0.0)*v2;
+        p.x = abs(p.x);
+        p.y -= r;
+        return length(p-v3*clamp(dot(p,v3),0.0,k1z*r))
+            * sign(p.y*v3.x-p.x*v3.y);
+    }
+    // Regular Star - exact
+    float sdStar( vector2 p; float r; int n; float m){
+        // next 4 lines can be precomputed for a given shape
+        float an = 3.141593/(float)n;
+        float en = 3.141593/m;  // m is between 2 and n
+        vector2  acs = set(cos(an),sin(an));
+        vector2  ecs = set(cos(en),sin(en)); // ecs=vector2(0,1) for regular polygon
+
+        // float bn = mod(atan(p.x,p.y),2.0*an) - an;
+        float bn = (atan(p.x,p.y)%(2.0*an)) - an;
+
+        p = length(p)*set(cos(bn),abs(sin(bn)));
+        p -= r*acs;
+        p += ecs*clamp( -dot(p,ecs), 0.0, r*acs.y/ecs.y);
+        return length(p)*sign(p.x);
+    }
+    // Pie - exact
+    float sdPie( vector2 p; vector2 c; float r ){
+        p.x = abs(p.x);
+        float l = length(p) - r;
+        float m = length(p-c*clamp(dot(p,c),0.0,r)); // c=sin/cos of aperture
+        return max(l,m*sign(c.y*p.x-c.x*p.y));
+    }
+    // Cut Disk - exact
+    float sdCutDisk( vector2 p; float r; float h ){
+        float w = sqrt(r*r-h*h); // constant for any given shape
+        p.x = abs(p.x);
+        float s = max( (h-r)*p.x*p.x+w*w*(h+r-2.0*p.y), h*p.x-w*p.y );
+        return (s<0.0) ? length(p)-r :
+            (p.x<w) ? h - p.y     :
+                        length(p-set(w,h));
+    }
+    // Arc - exact
+    float sdArc( vector2 p; vector2 sc; float ra; float rb ){
+        // sc is the sin/cos of the arc's aperture
+        p.x = abs(p.x);
+        return ((sc.y*p.x>sc.x*p.y) ? length(p-sc*ra) : abs(length(p)-ra)) - rb;
+    }
+    // Ring - exact
+    float sdRing( vector2 p; vector2 sc; float r; float th ){
+        p.x = abs(p.x);
+        p = set(set(sc.x,sc.y),set(-sc.y,sc.x))*p;
+
+        return max( abs(length(p)-r)-th*0.5,
+                    length(set(p.x,max(0.0,abs(r-p.y)-th*0.5)))*sign(p.x) );
+    }
+    // Horseshoe - exact
+    float sdHorseshoe( vector2 p; vector2 sc; float r; vector2 w ){
+        p.x = abs(p.x);
+        float l = length(p);
+        p = set(set(-sc.x, sc.y),set(sc.y,sc.x)) *p;
+
+        p = set((p.y>0.0 || p.x>0.0)?p.x:l*sign(-sc.x),
+                (p.x>0.0)?p.y:l );
+        p = set(p.x,abs(p.y-r))-w;
+        return length(max(p,0.0)) + min(0.0,max(p.x,p.y));
+    }
+    // Vesica - exact
+    float sdVesica(vector2 p; float r; float d){
+
+        p = abs(p);
+
+        float b = sqrt(r*r-d*d);  // can delay this sqrt by rewriting the comparison
+        return ((p.y-b)*d > p.x*b) ? length(p-set(0.0,b))*sign(d)
+                                    : length(p-set(-d,0.0))-r;
+
+    }
+    // Oriented Vesica - exact
+    float sdOrientedVesica( vector2 p; vector2 a; vector2 b; float w ){
+        float r = 0.5*length(b-a);
+        float d = 0.5*(r*r-w*w)/w;
+        vector2 v = (b-a)/r;
+        vector2 c = (b+a)*0.5;
+        vector2 q = 0.5*abs(set(set(v.y,v.x),set(-v.x,v.y))*(p-c));
+        vector h = (r*q.x<d*(q.y-r)) ? set(0.0,r,0.0) : set(-d,0.0,d+w);
+        return length( q-set(h.x,h.y)) - h.z;
+    }
+    // Moon - exact
+    float sdMoon(vector2 p; float d; float ra; float rb ){
+        p.y = abs(p.y);
+        float a = (ra*ra - rb*rb + d*d)/(2.0*d);
+        float b = sqrt(max(ra*ra-a*a,0.0));
+        if( d*(p.x*b-p.y*a) > d*d*max(b-p.y,0.0) )
+            return length(p-set(a,b));
+        return max( (length(p          )-ra),
+                -(length(p-set(d,0))-rb));
+    }
+    // Circle Cross - exact
+    float sdRoundedCross( vector2 p; float h ){
+
+        float k = 0.5*(h+1.0/h);               // k should be const/precomputed at modeling time
+        
+        p = abs(p);
+        return ( p.x<1.0 && p.y<p.x*(k-h)+h ) ? 
+                k-sqrt(dot2(p-set(1,k)))  :  // circular arc
+                sqrt(min(dot2(p-set(0,h)),     // top corner
+                            dot2(p-set(1,0))));   // right corner
+    }
+    // Simple Egg - exact
+    float sdEgg( vector2 p; float ra; float rb ){
+        float k = sqrt(3.0);
+        p.x = abs(p.x);
+        float r = ra - rb;
+        return ((p.y<0.0)       ?   length(set(p.x,  p.y    )) - r :
+                (k*(p.x+r)<p.y) ?   length(set(p.x,  p.y-k*r)) :
+                                    length(set(p.x+r,p.y    )) - 2.0*r) - rb;
+    }
+    // Heart - exact
+    float sdHeart( vector2 p ){
+        p.x = abs(p.x);
+
+        if( p.y+p.x>1.0 )
+            return sqrt(dot2(p-set(0.25,0.75))) - sqrt(2.0)/4.0;
+        return sqrt(min(dot2(p-set(0.00,1.00)),
+                        dot2(p-0.5*max(p.x+p.y,0.0)))) * sign(p.x-p.y);
+    }
+    // Cross - exact exterior, bound interior
+    float sdCross( vector2 p; vector2 b; float r ) {
+        p = abs(p); p = (p.y>p.x) ? p.yx : p.xy;
+        vector2  q = p - b;
+        float k = max(q.y,q.x);
+        vector2  w = (k>0.0) ? q : set(b.y-p.x,-k);
+        return sign(k)*length(max(w,0.0)) + r;
+    }
+    // Rounded X - exact
+    float sdRoundedX( vector2 p; float w; float r ){
+        p = abs(p);
+        return length(p-min(p.x+p.y,w)*0.5) - r;
+    }
+    // Polygon - exact
+    float sdPolygon( vector2 p; vector2 v[] ){
+        int num = len(v);
+        float d = dot(p-v[0],p-v[0]);
+        float s = 1.0;
+
+        for( int i=0, j=num-1; i<num; j=i, i++ )
+        {
+            // distance
+            vector2 e = v[j] - v[i];
+            vector2 w =    p - v[i];
+
+            vector2 b = w - e*clamp( dot(w,e)/dot(e,e), 0.0, 1.0 );
+            d = min( d, dot(b,b) );
+
+            int cond = (p.y>=v[i].y) + (p.y <v[j].y) + (e.x*w.y>e.y*w.x);
+            
+            if( cond==3 || cond==0 ) s=-s;  
+        }
+        
+        return s*sqrt(d);
+    }
+    // Ellipse - exact
+    float sdEllipse( vector2 p; vector2 ab ){
+        vector2 _ab = set(ab); //in case read only
+        p = abs(p);
+
+        if( p.x > p.y ){
+            p=swizzle(p,1,0);  //p.yx;
+            _ab=swizzle(_ab,1,0);//_ab.yx;
+        }
+
+        float l = _ab.y*_ab.y - _ab.x*_ab.x;
+        
+        float m = _ab.x*p.x/l; 
+        float n = _ab.y*p.y/l; 
+        float m2 = m*m;
+        float n2 = n*n;
+        
+        float c = (m2+n2-1.0)/3.0; 
+        float c3 = c*c*c;
+
+        float d = c3 + m2*n2;
+        float q = d  + m2*n2;
+        float g = m  + m *n2;
+
+        float co;
+
+        if( d<0.0 )
+        {
+            float h = acos(q/c3)/3.0;
+            float s = cos(h) + 2.0;
+            float t = sin(h) * sqrt(3.0);
+            float rx = sqrt( m2-c*(s+t) );
+            float ry = sqrt( m2-c*(s-t) );
+            co = ry + sign(l)*rx + abs(g)/(rx*ry);
+        }
+        else
+        {
+            float h = 2.0*m*n*sqrt(d);
+            float s = sign(q+h)*pow( abs(q+h), 1.0/3.0 );
+            float t = sign(q-h)*pow( abs(q-h), 1.0/3.0 );
+            float rx = -(s+t) - c*4.0 + 2.0*m2;
+            float ry =  (s-t)*sqrt(3.0);
+            float rm = sqrt( rx*rx + ry*ry );
+            co = ry/sqrt(rm-rx) + 2.0*g/rm;
+        }
+        co = (co-m)/2.0;
+
+        float si = sqrt( max(1.0-co*co,0.0) );
+    
+        vector2 r = _ab * set(co,si);
+        
+        return length(r-p) * sign(p.y-r.y);
+    }
+    // Parabola - exact
+    float sdParabola( vector2 pos; float k ){
+        pos.x = abs(pos.x);
+        float ik = 1.0/k;
+        float p = ik*(pos.y - 0.5*ik)/3.0;
+        float q = 0.25*ik*ik*pos.x;
+        float h = q*q - p*p*p;
+        float r = sqrt(abs(h));
+        float x = (h>0.0) ? 
+            pow(q+r,1.0/3.0) - pow(abs(q-r),1.0/3.0)*sign(r-q) :
+            2.0*cos(atan(r,q)/3.0)*sqrt(p);
+
+        return length(pos-set(x,k*x*x)) * sign(pos.x-x);
+    }
+
+    // Parabola Segment - exact
+    float sdParabola( vector2 pos; float wi; float he ){
+
+        pos.x = abs(pos.x);
+
+        float ik = wi*wi/he;
+        float p = ik*(he-pos.y-0.5*ik)/3.0;
+        float q = pos.x*ik*ik*0.25;
+        float h = q*q - p*p*p;
+        
+        float x = 0;
+        if( h>0.0 ) // 1 root
+        {
+            float r = sqrt(h);
+            x = pow(q+r,1.0/3.0) + pow(abs(q-r),1.0/3.0)*sign(p);
+        }
+        else        // 3 roots
+        {
+            float r = sqrt(p);
+            x = 2.0*r*cos(acos(q/(p*r))/3.0); // see https://www.shadertoy.com/view/WltSD7 for an implementation of cos(acos(x)/3) without trigonometrics
+        }
+        
+        x = min(x,wi);
+        
+        return length(pos-set(x,he-x*x/ik)) * 
+                sign(ik*(pos.y-he)+pos.x*pos.x);
+    
+    }
+
+    // Quadratic Bezier - exact
+    float sdBezier( vector2 pos; vector2 A; vector2 B; vector2 C; ){
+        vector2 a = B - A;
+        vector2 b = A - 2.0*B + C;
+        vector2 c = a * 2.0;
+        vector2 d = A - pos;
+
+        // cubic to be solved (kx*=3 and ky*=3)
+        float kk = 1.0/dot(b,b);
+        float kx = kk * dot(a,b);
+        float ky = kk * (2.0*dot(a,a)+dot(d,b))/3.0;
+        float kz = kk * dot(d,a);      
+
+        float res = 0.0;
+        float sgn = 0.0;
+
+        float p  = ky - kx*kx;
+        float q  = kx*(2.0*kx*kx - 3.0*ky) + kz;
+        float p3 = p*p*p;
+        float q2 = q*q;
+        float h  = q2 + 4.0*p3;
+
+        // vector2 outQ;
+
+        if( h>=0.0 ) 
+        {   // 1 root
+            h = sqrt(h);
+            vector2 x = (set(h,-h)-q)/2.0;
+
+            if( abs(p)<0.001 )
+            {
+                float k = p3/q;              // linear approx
+                // float k = (1.0-p3/q2)*p3/q;  // quadratic approx 
+                x = set(k,-k-q);  
+            }
+
+            vector2 uv = sign(x)*pow(abs(x), set(1.0/3.0));
+            float t = uv.x + uv.y;
+
+            // from NinjaKoala - single newton iteration to account for cancellation
+            t -= (t*(t*t+3.0*p)+q)/(3.0*t*t+3.0*p);
+            
+            t = clamp( t-kx, 0.0, 1.0 );
+            vector2  w = d+(c+b*t)*t;
+            // outQ = w + pos;
+            res = dot2(w);
+            sgn = cro(c+2.0*b*t,w);
+        }
+        else 
+        {   // 3 roots
+            float z = sqrt(-p);
+            
+            float v = acos(q/(p*z*2.0))/3.0;
+            float m = cos(v);
+            float n = sin(v);
+
+            n *= sqrt(3.0);
+            vector  t = clamp( set(m+m,-n-m,n-m)*z-kx, 0.0, 1.0 );
+            vector2  qx=d+(c+b*t.x)*t.x;
+            float dx=dot2(qx);
+            float sx=cro(a+b*t.x,qx);
+            vector2 qy=d+(c+b*t.y)*t.y; 
+            float dy=dot2(qy);
+            float sy=cro(a+b*t.y,qy);
+
+            if( dx<dy ) {
+                res=dx;
+                sgn=sx;
+                // outQ=qx+pos;
+            } 
+            else{
+                res=dy;
+                sgn=sy;
+                // outQ=qy+pos;
+            }
+        }
+        
+        return sqrt( res )*sign(sgn);
+    }
+    // Bobbly Cross - exact
+    float sdBlobbyCross( vector2 pos; float he ){
+        pos = abs(pos);
+        pos = set(abs(pos.x-pos.y),1.0-pos.x-pos.y)/sqrt(2.0);
+
+
+        float p = (he-pos.y-0.25/he)/(6.0*he);
+        float q = pos.x/(he*he*16.0);
+        float h = q*q - p*p*p;
+        
+        float x;
+        if( h>0.0 ) { float r = sqrt(h); x = pow(q+r,1.0/3.0) - pow(abs(q-r),1.0/3.0)*sign(r-q); }
+        else        { float r = sqrt(p); x = 2.0*r*cos(acos(q/(p*r))/3.0); }
+        x = min(x,sqrt(2.0)/2.0);
+        
+        vector2 z = set(x,he*(1.0-2.0*x*x)) - pos;
+        return length(z) * sign(z.y);
+    }
+    // Tunnel - exact
+    float sdTunnel( vector2 p; vector2 wh ){
+        p.x = abs(p.x); p.y = -p.y;
+        vector2 q = p - wh;
+
+        float d1 = dot2(set(max(q.x,0.0),q.y));
+        q.x = (p.y>0.0) ? q.x : length(p)-wh.x;
+        float d2 = dot2(set(q.x,max(q.y,0.0)));
+        float d = sqrt( min(d1,d2) );
+        
+        return (max(q.x,q.y)<0.0) ? -d : d;
+    }
+    // Stairs - exact
+    float sdStairs( vector2 p; vector2 wh; float n ){
+        vector2 ba = wh*n;
+        float d = min(dot2(p-set(clamp(p.x,0.0,ba.x),0.0)), 
+                    dot2(p-set(ba.x,clamp(p.y,0.0,ba.y))) );
+        float s = sign(max(-p.y,p.x-ba.x) );
+
+        float dia = length(wh);
+        p = set(set(wh.x,-wh.y), set(wh.y,wh.x))*p/dia;
+        float id = clamp(rint(p.x/dia),0.0,n-1.0);
+        p.x = p.x - id*dia;
+        p = set(set(wh.x, wh.y),set(-wh.y,wh.x))*p/dia;
+
+        float hh = wh.y/2.0;
+        p.y -= hh;
+        if( p.y>hh*sign(p.x) ) s=1.0;
+        p = (id<0.5 || p.x>0.0) ? p : -p;
+        d = min( d, dot2(p-set(0.0,clamp(p.y,-hh,hh))) );
+        d = min( d, dot2(p-set(clamp(p.x,0.0,wh.x),hh)) );
+        
+        return sqrt(d)*s;
+    }
+    // Quadratic Circle - exact
+    float sdQuadraticCircle( vector2 p ){
+        p = abs(p); if( p.y>p.x ) p=swizzle(p,1,0); // symmetries
+
+        float a = p.x-p.y;
+        float b = p.x+p.y;
+        float c = (2.0*b-1.0)/3.0;
+        float h = a*a + c*c*c;
+        float t;
+
+        if( h>=0.0 )
+        {   
+            h = sqrt(h);
+            t = sign(h-a)*pow(abs(h-a),1.0/3.0) - pow(h+a,1.0/3.0);
+        }
+        else
+        {   
+            float z = sqrt(-c);
+            float v = acos(a/(c*z))/3.0;
+            t = -z*(cos(v)+sin(v)*1.732050808);
+        }
+        t *= 0.5;
+        vector2 w = set(-t,t) + 0.75 - t*t - p;
+        return length(w) * sign( a*a*0.5+b-1.5 );
+    }
+    // Hyperbola - exact // k (0,inf)
+    float sdHyberbola( vector2 p; float k; float he ){
+        p = abs(p);
+        p = set(p.x-p.y,p.x+p.y)/sqrt(2.0);
+
+        float x2 = p.x*p.x/16.0;
+        float y2 = p.y*p.y/16.0;
+        float r = k*(4.0*k - p.x*p.y)/12.0;
+        float q = (x2 - y2)*k*k;
+        float h = q*q + r*r*r;
+        float u;
+        if( h<0.0 )
+        {
+            float m = sqrt(-r);
+            u = m*cos( acos(q/(r*m))/3.0 );
+        }
+        else
+        {
+            float m = pow(sqrt(h)-q,1.0/3.0);
+            u = (m - r/m)/2.0;
+        }
+        float w = sqrt( u + x2 );
+        float b = k*p.y - x2*p.x*2.0;
+        float t = p.x/4.0 - w + sqrt( 2.0*x2 - u + b/w/4.0 );
+        t = max(t,sqrt(he*he*0.5+k)-he/sqrt(2.0));
+        float d = length( p-set(t,k/t) );
+        return p.x*p.y < k ? d : -d;
+    }
+    // Cool S - exact
+    float sdCoolS( vector2 p ){
+        float six = (p.y<0.0) ? -p.x : p.x;
+        p.x = abs(p.x);
+        p.y = abs(p.y) - 0.2;
+        float rex = p.x - min(rint(p.x/0.4),0.4);
+        float aby = abs(p.y-0.2)-0.6;
+        
+        float d = dot2(set(six,-p.y)-clamp(0.5*(six-p.y),0.0,0.2));
+        d = min(d,dot2(set(p.x,-aby)-clamp(0.5*(p.x-aby),0.0,0.4)));
+        d = min(d,dot2(set(rex,p.y  -clamp(p.y          ,0.0,0.4))));
+        
+        float s = 2.0*p.x + aby + abs(aby+0.4) - 0.4;
+        return sqrt(d) * sign(s);
+    }
+    // Circle Wave - exact
+    float sdCircleWave( vector2 p; float tb; float ra ){
+        float _tb = 3.1415927*5.0/6.0*max(tb,0.0001);
+        vector2 co = ra*set(sin(_tb),cos(_tb));
+        p.x = abs((p.x%(co.x*4.0))-co.x*2.0);
+
+        vector2  p1 = p;
+        vector2  p2 = set(abs(p.x-2.0*co.x),-p.y+2.0*co.y);
+        float d1 = ((co.y*p1.x>co.x*p1.y) ? length(p1-co) : abs(length(p1)-ra));
+        float d2 = ((co.y*p2.x>co.x*p2.y) ? length(p2-co) : abs(length(p2)-ra));
+        return min(d1, d2); 
+    }
+
+#endif

@@ -1,0 +1,17 @@
+// RUN OVER DETAIL
+
+int counts[] = i[]@cell_count;
+int total = len(counts);
+
+int starts[]; resize(starts, total);
+
+int offset = 0;
+for (int i = 0; i < total; i++) {
+    starts[i] = offset;
+    offset += counts[i];
+}
+
+i[]@cell_start  = starts;
+
+int zeros[]; resize(zeros, total);
+i[]@cell_offset = zeros;

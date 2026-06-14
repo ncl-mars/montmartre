@@ -1,0 +1,35 @@
+//-- set attribs
+i@active = 1;
+
+//-- set group
+i@group_attractors = 1;
+
+i@is_tree_node = 0;
+i@is_attractor = 1;
+
+v@force_acc = {0, 0, 0};
+
+
+//-- Defensively zero-init the same three 
+// so compile-block-style merges don't complain about missing attribs 
+i@split_depth = 0;
+f@lateral_pressure = 0;
+v@last_att_force = {0, 0, 0};
+
+i@parent_id     = -1;
+f@branch_radius = 0;
+
+i@is_lateral_start = 0;
+
+// murray, 
+i@murray_acc = 0;
+
+// allometric
+f@arc_total_since_lateral = 0;
+
+// phyllotaxis (defensive)
+i@lateral_count = 0;
+i@phyllo_index = 0;
+
+// damage system
+f@damage = 0;

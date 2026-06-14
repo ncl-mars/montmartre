@@ -1,0 +1,55 @@
+// if needed, needs to be set on child in topology
+// i@group_treenode = 1;
+
+i@is_tree_node = 1;
+i@is_attractor = 0;
+i@is_tip       = 1;      // seed is a tip
+
+// Attract accumulator
+i@att_ix    = 0;
+i@att_iy    = 0;
+i@att_iz    = 0;
+i@att_count = 0;
+
+// Shared accumulator for VDB / other contributors
+v@force_acc = {0, 0, 0};
+
+// Physics state
+v@velocity        = {0, 0, 0};
+f@arc_since_spawn = 0;
+
+i@active = 1;
+
+// vigor
+i@split_depth = 0;
+f@lateral_pressure = 0;
+v@last_att_force = {0, 0, 0};
+
+// self_collide
+i@parent_id     = -1;
+f@branch_radius = chf("base_radius");
+
+// sweep meshing
+i@is_lateral_start = 0;
+
+// murray
+i@murray_acc = 0;
+
+// allometric
+f@arc_total_since_lateral = 0;
+
+// phyllotaxis
+i@lateral_count = 0;
+i@phyllo_index = 0;
+
+// apical dominance
+i@dominance_acc = 0;
+f@dominance     = 0;
+
+// light-credit
+f@light_credit = chf("light_credit_grace");
+
+
+// REMOVED
+// i@stable_id        = 0;
+// i@parent_stable_id = -1;

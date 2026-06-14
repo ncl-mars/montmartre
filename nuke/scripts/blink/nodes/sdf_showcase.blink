@@ -1,0 +1,102 @@
+// SDF Shape Showcase
+// Renders a grid of 2D SDF shapes with smooth coloring
+//
+// Library Files needed:
+//   utils.blib, sd_shapes_2d.blib, remapping.blib
+
+kernel SDFShowcase : ImageComputationKernel<ePixelWise>
+{
+    Image<eWrite> dst;
+
+    param:
+        float2 resolution;
+        float time;
+        int columns;
+        float zoom;
+        float thickness;
+
+    local:
+        int rows;
+        int total;
+
+    void define() {
+        defineParam(resolution, "Resolution", float2(1920.0f, 1080.0f));
+        defineParam(time, "Time", 0.0f);
+        defineParam(columns, "Columns", 5);
+        defineParam(zoom, "Zoom", 0.7f);
+        defineParam(thickness, "Outline", 0.004f);
+    }
+
+    void init() {
+        total = 20;
+        rows = (total + columns - 1) / columns;
+    }
+
+    float3 colorSDF(float d) {
+        float v = 1.0f - smoothstep(0.0f, thickness, fabs(frac(d * 10.0f) - 0.5f));
+        if(d<0) v=-d;
+        return float3(v, v, v);
+    }
+
+    void process(int2 pos) {
+
+        // normalized coords
+        float aspect = resolution.x / resolution.y;
+        float2 uv = float2(float(pos.x) / resolution.x, float(pos.y) / resolution.y);
+
+        // grid cell
+        float cellW = 1.0f / float(columns);
+        float cellH = 1.0f / float(rows);
+
+        int col = int(floor(uv.x / cellW));
+        int row = int(floor(uv.y / cellH));
+        int idx = row * columns + col;
+
+        // local UV centered in cell [-0.5, 0.5]
+        float2 luv = float2(
+            (uv.x - (float(col) + 0.5f) * cellW) / cellW,
+            (uv.y - (float(row) + 0.5f) * cellH) / cellH
+        );
+        // correct aspect per cell
+        luv.x *= (cellW * aspect) / cellH;
+
+        // scale to SDF space
+        float2 p = luv / zoom;
+
+        float d = 1e6f;
+        float anim = sin(time * 0.8f) * 0.5f + 0.5f; // 0..1
+        anim *= 4.0f;
+
+
+        if      (idx == 0)  d = sdCircle(p, 0.3f + anim * 0.1f);
+        else if (idx == 1)  d = sdRectangle(p, 1.0f, float2(0.5f + anim * 0.2f, 0.4f));
+        else if (idx == 2)  d = sdRoundedRectangle(p, 1.0f, float2(0.5f, 0.4f), float4(0.05f + anim * 0.1f, 0.05f, 0.15f, 0.05f));
+        else if (idx == 3)  d = sdDiamond(p, 1.0f, float2(0.3f + anim * 0.1f, 0.5f));
+        else if (idx == 4)  d = sdEquilateralTriangle(p, 0.3f + anim * 0.05f);
+        else if (idx == 5)  d = sdPentagon(p, 0.4f);//
+        else if (idx == 6)  d = sdHexagon(p, 0.3f);
+        else if (idx == 7)  d = sdOctogon(p, 0.3f);
+        else if (idx == 8)  d = sdStar(p, 0.35f, 5, 2.0f + anim * 2.0f);
+        else if (idx == 9)  d = sdHexagram(p, 0.5f);
+        else if (idx == 10) d = sdTrapezoid(p, 1.0f, 0.5f, 0.5f + anim * 0.2f, 0.3f);
+        else if (idx == 11) d = sdParallelogram(p, 1.0f, 0.5f, 0.2f, 0.1f + anim * 0.1f);//
+        else if (idx == 12) d = sdEllipse(p, 1.0f, float2(0.35f, 0.2f + anim * 0.1f));
+        else if (idx == 13) d = sdCapsule(p, 1.0f, 0.4f, 0.1f + anim * 0.05f, 0.05f);
+        else if (idx == 14) d = sdPie(p, 0.35f, 0.3f + anim * 0.5f);
+        else if (idx == 15) d = sdArc(p, 1.0f, 0.35f, 0.04f, 0.3f + anim * 0.4f);
+        else if (idx == 16) d = sdMoon(p, 1.0f, 0.3f, 0.25f, 0.2f + anim * 0.2f);
+        else if (idx == 17) d = sdEgg(p, 1.0f, 0.3f, 0.1f + anim * 0.1f);
+        else if (idx == 18) { float2 hp = p * 2.5f; hp.y -= 0.5f; d = sdHeart(hp) / 2.5f; }
+        else if (idx == 19) d = sdCross(p, 1.0f, float2(0.4f, 0.5f + anim * 0.3f), -0.05f);
+
+        float3 c3 = colorSDF(d);
+
+        // grid lines
+        float gx = fabs(frac(uv.x / cellW) - 0.5f);
+        float gy = fabs(frac(uv.y / cellH) - 0.5f);
+        float gridLine = 1.0f - smoothstep(0.0f, 0.008f, min(gx, gy));
+        c3 = lerp(c3, float3(0.15f, 0.15f, 0.15f), gridLine * 0.6f);
+
+        dst() = float4(c3.x, c3.y, c3.z, 1.0f);
+    }
+};

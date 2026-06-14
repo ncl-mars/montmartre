@@ -1,0 +1,133 @@
+#ifndef RAY_MARCHING
+
+    #if defined(_MAP)!=1
+        float defaultMap(vector pos)
+        {
+            return length(pos)-0.5;
+        }
+        #define _MAP defaultMap
+    #endif
+
+    vector calcNormal( vector pos; float eps){
+
+        vector2 e = set(1.0,-1.0)*0.5773*eps;
+        return normalize(   set(e.x,e.y,e.y)*_MAP( pos + set(e.x,e.y,e.y) ) + 
+                            set(e.y,e.y,e.x)*_MAP( pos + set(e.y,e.y,e.x) ) + 
+                            set(e.y,e.x,e.y)*_MAP( pos + set(e.y,e.x,e.y) ) + 
+                            set(e.x,e.x,e.x)*_MAP( pos + set(e.x,e.x,e.x) ) );
+    }
+
+
+    // #ifndef _SHADE_SURF
+    //     vector4 DefaultShadeSurf(vector ro, vector rd, vector4 res)
+    //     {
+    //         return 1;
+    //     }
+    // #define _SHADE_SURF DefaultShadeSurf
+    // #endif
+
+
+    // #ifndef _EPS_NOR
+    // #define _EPS_NOR 0.05
+    // #endif 
+    // vector CalcNormal( vector pos ){
+
+    //     vector2 e = vector2(1.0,-1.0)*0.5773*_EPS_NOR;
+    //     return normalize( e.xyy*_MAP( pos + e.xyy ).x + 
+    //                       e.yyx*_MAP( pos + e.yyx ).x + 
+    //                       e.yxy*_MAP( pos + e.yxy ).x + 
+    //                       e.xxx*_MAP( pos + e.xxx ).x );
+    // }
+
+    // vector CalcNormal( vector pos, float eps){
+
+    //     vector2 e = vector2(1.0,-1.0)*0.5773*eps;
+    //     return normalize( e.xyy*_MAP( pos + e.xyy ).x + 
+    //                       e.yyx*_MAP( pos + e.yyx ).x + 
+    //                       e.yxy*_MAP( pos + e.yxy ).x + 
+    //                       e.xxx*_MAP( pos + e.xxx ).x );
+
+    // }
+
+    // vector CalcNormal( vector pos, float eps){
+
+    //     vector2 e = set(1.0,-1.0)*0.5773*eps;
+    //     return normalize( _MAP( pos ) + 
+    //                       _MAP( pos ) + 
+    //                       _MAP( pos ) + 
+    //                       _MAP( pos ) );
+
+    // }
+
+
+    // #ifndef _MAX_STEP_SHA
+    // #define _MAX_STEP_SHA 4
+    // #endif 
+    // float CalcSoftShadow( vector ro, vector rd, float tmin, float tmax, int maxstep, const float k ){
+
+    //     float res = 1.0;
+    //     float t = tmin;
+
+    //     for( int i=0; i<maxstep; i++ )
+    //     {
+    //         float h = _MAP( ro + rd*t ).x;
+    //         res = min( res, k*h/t );
+    //         t += clamp( h, 0.02, 0.20 );
+    //         if( res<0.005 || t>tmax ) break;
+    //     }
+    //     return clamp( res, 0.0, 1.0 );
+    // }
+
+
+    // //---------------------------------------------------------- ray marcher
+    // #ifndef _MAX_STEP_SURF
+    // #define _MAX_STEP_SURF 16
+    // #endif
+    // #ifndef _EPS_SURF
+    // #define _EPS_SURF 0.001
+    // #endif
+
+    // #ifndef _SCALE_MARCH
+    // #define _SCALE_MARCH 1.0
+    // #endif
+
+    // vector4 March(vector ro, vector rd, float tmin, float tmax){
+
+    //     float t = tmin;
+    //     vector4 res = -1;
+
+    //     // [unroll(_MAX_STEP_SURF)]
+    //     [loop]
+    //     for (int s = 0; s < _MAX_STEP_SURF; s++)
+    //     {
+    //         vector4 h = _MAP(ro + rd * t);
+
+    // #if defined(_THROUGH)
+    //         float d = abs(h.x);
+    //         if(d < _EPS_SURF) {
+    //             res = vector4(t, h.yzw);
+    //             break;
+    //         }
+    //         t += d;
+
+    // #elif defined(_IS_INSIDE)
+    //         float d = -h.x;
+    //         if(d < _EPS_SURF) {
+    //             res = vector4(t, h.yzw);
+    //             break;
+    //         }
+    //         t += d;
+    // #else
+    //         if( abs(h.x) < _EPS_SURF) {
+    //             res = vector4(t, h.yzw);
+    //             break;
+    //         }
+    //         t += h.x * _SCALE_MARCH;
+    // #endif
+
+    //         if(t > tmax) break;
+    //     }
+
+    //     return res;
+    // }
+#endif

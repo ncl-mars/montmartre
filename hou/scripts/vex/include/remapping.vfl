@@ -1,0 +1,72 @@
+#ifndef REMAPPING
+    #define REMAPPING
+
+
+    //STEP (https://registry.khronos.org/OpenGL-Refpages/gl4/html/step.xhtml)
+    vector step(vector a; vector b){ return 1-clamp(ceil(a-b), 0,1);}
+    float step(float a; float b){ return 1-clamp(ceil(a-b), 0,1);}
+    vector2 step(vector2 a; vector2 b){ return 1-clamp(ceil(a-b), 0,1);}
+    vector4 step(vector4 a; vector4 b){ return 1-clamp(ceil(a-b), 0,1);}
+
+
+    //SMOOTHSTEP (https://registry.khronos.org/OpenGL-Refpages/gl4/html/smoothstep.xhtml)
+    vector smoothstep(vector a; vector b; vector x){
+        vector t = clamp((x - a) / (b - a), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+    }
+    float smoothstep(float a; float b; float x){
+        float t = clamp((x - a) / (b - a), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+    }
+    vector2 smoothstep(vector2 a; vector2 b; vector2 x){
+        vector2 t = clamp((x - a) / (b - a), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+    }
+    vector4 smoothstep(vector4 a; vector4 b; vector4 x){
+        vector4 t = clamp((x - a) / (b - a), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+    }
+    float rampToTri(float ramp){
+        return min(ramp*-1+1.0, ramp) * 2.0;
+    }
+    float gain( float x; float k ) {
+        float a = 0.5*pow(2.0*((x<0.5)?x:1.0-x), k);
+        return (x<0.5)?a:1.0-a;
+    }
+    float expSustainedImpulse(float x; float f; float k){
+        float s = max(x-f,0.0);
+        return min( x*x/(f*f), 1.0+(2.0/f)*s*exp(-k*s));
+    }
+    float trunc_fallof( float x; float m ){
+        x /= m;
+        return (x-2.0)*x+1.0;
+    }
+    float almostUnitIdentity( float x ){
+        return x*x*(2.0-x);
+    }
+    float integralSmoothstep( float x; float T ){
+        if( x>T ) return x - T/2.0;
+        return x*x*x*(1.0-x*0.5/T)/T/T;
+    }
+    float parabola( float x; float k ){
+
+        return pow( 4.0f*x*(1.0f-x), k );
+    }
+    float sinc( float x; float k ){
+        
+        float a = M_PI*(k*x-1.0);
+        return sin(a)/a;
+    }
+    float pcurve( float x; float a; float b ){
+
+        float k = pow(a+b,a+b)/(pow(a,a)*pow(b,b));
+        return k*pow(x,a)*pow(1.0-x,b);
+    }
+    float sphericalDisplace(vector2 wpos; float radius){
+        
+        float d2 = dot(wpos, wpos);
+        float r2 = radius * radius;
+        return (sqrt(r2 - d2) - radius) * (d2 <= r2);
+    }
+
+#endif

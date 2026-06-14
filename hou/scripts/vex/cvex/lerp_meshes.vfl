@@ -1,0 +1,42 @@
+#include "$HIP/scripts/vex/include/remapping.vfl"
+
+#define SK_ID 1
+
+float time = @Time - 0.25; // offset start
+time = max(time, 0.0);
+
+float amount = ch("amount");
+
+float rc_ptdist = f@rcurptdist;
+float rc_len = detail(0, "rcurlen");
+
+vector pos = @P;
+vector tpos = point(1, "P", @ptnum);
+int iid = i@iid;
+int inum = detail(0, "numi");
+
+iid = (inum-1)-iid;
+float aid = abs(iid - (inum-1)*0.5);
+// float fid = aid / (inum * 0.5);
+
+float an = time * 0.035;
+an += aid * 0.03;
+
+rc_ptdist = (rc_ptdist - 1.30)%rc_len; // offset start
+
+float dist = iid * rc_len + rc_ptdist;
+float totlen = inum * rc_len;
+
+// float ru = rc_ptdist/rc_len;
+float u = dist/totlen;
+
+u = u * 2.0 - 1.0;
+u = 1.0 - abs(u);
+u = (u-1.0) + an;
+u = 1.0 - fit(u,0,0.01,0,1);
+u = parabola(u*0.5, 2.50);
+
+pos = lerp(pos, tpos, u);
+
+@P = pos;
+

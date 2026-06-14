@@ -1,0 +1,23 @@
+// RUN OVER DETAIL
+
+float cell_size = chf("cell_size");
+float pad       = cell_size;
+
+vector bbox_min = getbbox_min(0) - pad;
+vector bbox_max = getbbox_max(0) + pad;
+vector range    = bbox_max - bbox_min;
+vector res      = set(ceil(range.x / cell_size),
+                      ceil(range.y / cell_size),
+                      ceil(range.z / cell_size));
+
+v@grid_min    = bbox_min;
+v@grid_res    = res;
+f@cell_size   = cell_size;
+
+int total_cells = int(res.x * res.y * res.z);
+int zeros[]; resize(zeros, total_cells);
+i[]@cell_count  = zeros;
+i[]@cell_start  = zeros;
+
+int sorted[]; resize(sorted, npoints(0));
+i[]@sorted_idx = sorted;

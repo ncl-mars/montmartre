@@ -1,0 +1,234 @@
+#include "$HIP/scripts/vex/include/remapping.vfl"
+
+#define N_DIAMS 26
+
+int isdiamond = i@group_diamond; 
+float fid = float(i@iid);
+float did = float(i@indices);
+float time = @Time;
+matrix xform = 4@transform;
+vector off = set(0); 
+float an; float t0, t1;
+
+float acc = fit(did, 0, N_DIAMS-1, 0, 1) * 0.025;
+time = time*0.25 - did*(0.05-acc); // 0.05
+
+vector pos = @P;
+
+
+if(i@group_pivot){
+    v@rest = pos;    
+}
+
+//------------------------------- params
+float rotdur = 0.15;
+float rotdel = 18.85/20.0;
+float nturns = 51.0/360.0;
+float trsdur = 1.0;
+float trsdst = 0.5;
+
+
+if(isdiamond){
+
+    pos = ptransform(pos,invert(xform));
+
+    //------------------------------- rot
+    an = fit(time-rotdel,0,rotdur,0,1);
+    an = primuv(2, "y", 0, an);             // fallof rot
+
+    if(i@group_pivot < 0.5) prerotate(xform, an*nturns*M_PI*-2, set(1,0,0)); 
+
+
+    //------------------------------- trans
+    vector q = set(fid * 100, 0.0, 0);
+    float no = noise(q)*2.0-1.0;
+    trsdst = (1.0 + no*0.25) * trsdst;
+
+    q = set(fid*1000, @Time*0.1, 0);
+    vector ran = noise(q)*set(0,2,2)-set(0,1,1);
+
+    an = fit(time,0,trsdur,0,1);
+
+    ran *= pow(1.0-an, 2.0) * set(0,0.3,0.2); // 0.15, y = ring offnor, z = ring offtan
+
+    off += ran;
+
+    an = primuv(1, "y", 0, an);             // fallof spread
+
+    q = set(fid*0.025, @Time * 0.1, rand(fid));
+
+    no = (noise(q + set(400.0))*2.0-1.0) * 0.25;
+    no *= 1.0-fit(time, 0, rotdel, 0, 1);
+
+    off.x = max(1.0-an,0)*trsdst + no;
+
+    vector dir = normalize(off);
+    vector ang = quaterniontoeuler(dihedral(dir, set(1,0,0)), 0);
+
+    pretranslate(xform, off);
+    prerotate(xform, -ang, 0);
+    
+
+
+    //------------------------------- 
+    pos = ptransform(pos,xform);
+}
+else{
+    
+    int mid = i@mindex; float t2, t3;
+    // time -= trsdur - 0.075;
+    time -= trsdur;
+
+    time = max(time * 0.75, 0.0);
+
+    t0 = 0.0;
+    t1 = 0.26;
+
+    t2 = 0.00; // 0.05
+    t3 = 0.26;
+
+    an = fit(time, t0, t1, 0, 1);
+    an = primuv(3, "y", 0, an);
+    pos = lerp(pos, v@P1, an);
+
+    an = fit(time, t2, t3, 0, 1);
+    an = primuv(3, "y", 0, an) * 0.8;
+
+    pos = lerp(pos, v@P2, an);
+
+    if(time > (t1 + t2)) removepoint(0, @ptnum,1);
+}
+
+
+@P = pos;
+4@transform = xform;
+
+@Cd = 0.5;
+
+
+
+//-----------------------------------------------------------------------------------------
+/*
+    else{
+
+        int mid = i@mindex; float t2;
+        time -= trsdur - 0.125;
+        time = max(time * 0.75, 0.0);
+
+        t0 = 0.26;
+
+        t1 = 0.05;
+        t2 = 0.26;
+
+        an = fit(time, 0, t0, 0, 1);
+        pos = lerp(pos, v@P1, an);
+
+        an = fit(time, t1, t1 + t2, 0, 1);
+        an = primuv(3, "y", 0, an);             // fallof sert
+
+        pos = lerp(pos, v@P2, an);
+
+        if(time > (t1 + t2)) removepoint(0, @ptnum,1);
+    }
+    else{
+
+        int mid = i@mindex; float t2;
+        time -= trsdur - 0.125;
+        time = max(time * 0.75, 0.0);
+
+        t0 = 0.2;
+        t1 = 0.05;
+        t2 = 0.26;
+
+        an = fit(time, 0, t0, 0, 1);
+        pos = lerp(pos, v@P1, an);
+
+        an = fit(time, t1, t1 + t2, 0, 1);
+        an = primuv(3, "y", 0, an);             // fallof sert
+
+        pos = lerp(pos, v@P2, an);
+
+        if(time > (t1 + t2)) removepoint(0, @ptnum,1);
+    }
+*/
+
+
+
+
+
+
+
+
+// // NO SIM SPREAD
+
+
+// #include "$HIP/scripts/vex/include/remapping.vfl"
+
+// int isdiamond = i@group_diamond; 
+
+
+// int iid = i@iid;
+// float did = ((25 - iid) + 0)%26;
+
+// float time = @Time;
+// float an;
+// float t0, t1;
+
+// float scltime = 0.5;
+// time *= scltime;
+
+// time += 0.45;
+// time -= did * 0.2; // delai per index
+
+// if(time < 0)
+// {
+//     removepoint(0, @ptnum,1); // rm pts
+// } 
+
+
+// matrix xform = 4@transform;
+// vector ori = @P; // end pos
+// vector pos = ptransform(ori,invert(xform));
+
+// //-- transform
+// float rotdur = 0.6;
+// float rotdel = 0.5;
+// float nturns = 1.0;
+// float trsdur = 1.0;
+// float trsdst = 1.0;
+// float mskdur = 0.35;
+
+// // rot
+// if(isdiamond){
+//     an = fit(time-rotdel,0,rotdur,0,1);
+//     an = pow(an, 0.5);
+//     // pos = qrotate(eulertoquaternion(set(an*nturns*M_PI*-2,0,0),0),pos);
+
+
+//     // trans
+//     an = fit(time,0,trsdur,0,1);
+//     an = primuv(1, "y", 0, an);
+    
+//     pos.x += max(1.0-an,0)*trsdst;
+// }
+// else{
+//     // trans
+//     time -= trsdur-0.;
+//     an = fit(time,0,mskdur,0,1);
+//     // an = gain(an,2.0);
+//     pos.x += max(an,0)*0.025;
+
+//     if(time > mskdur) removepoint(0, @ptnum,1);
+
+
+// }
+
+
+// // apply mat
+// pos = ptransform(pos,xform); 
+
+// @P = pos;
+// // @Cd = did / 13.0;
+
+// @Cd = did/26.0;
+// @Cd = 0.5;

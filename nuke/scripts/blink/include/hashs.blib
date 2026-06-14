@@ -1,0 +1,117 @@
+// BlinkScript hash functions
+// Dave Hoskins "hash without sine" — https://www.shadertoy.com/view/4djSRW
+// Converted from OpenCL hashs.cl
+// All functions use float math only (no uint needed)
+// Depends on: utils.blib (frac)
+
+// 1 out, 1 in
+float hash11(float p) {
+    p = frac(p * 0.1031f);
+    p *= p + 33.33f;
+    p *= p + p;
+    return frac(p);
+}
+
+// 1 out, 2 in
+float hash12(float2 p) {
+    float3 p3 = frac3(float3(p.x, p.y, p.x) * 0.1031f);
+    float d = dot(p3, float3(p3.y, p3.z, p3.x) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+// 1 out, 3 in
+float hash13(float3 p3) {
+    p3 = frac3(p3 * 0.1031f);
+    float d = dot(p3, float3(p3.z, p3.y, p3.x) + 31.32f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+// 1 out, 4 in
+float hash14(float4 p4) {
+    p4 = frac4(float4(p4.x * 0.1031f, p4.y * 0.1030f, p4.z * 0.0973f, p4.w * 0.1099f));
+    float d = dot(p4, float4(p4.w, p4.z, p4.x, p4.y) + 33.33f);
+    p4.x += d; p4.y += d; p4.z += d; p4.w += d;
+    return frac((p4.x + p4.y) * (p4.z + p4.w));
+}
+
+// 2 out, 1 in
+float2 hash21(float p) {
+    float3 p3 = frac3(float3(p, p, p) * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.z, p3.x) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac2(float2(p3.x + p3.y, p3.x + p3.z) * float2(p3.z, p3.y));
+}
+
+// 2 out, 2 in
+float2 hash22(float2 p) {
+    float3 p3 = frac3(float3(p.x, p.y, p.x) * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.z, p3.x) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac2(float2(p3.x + p3.y, p3.x + p3.z) * float2(p3.z, p3.y));
+}
+
+// 2 out, 3 in
+float2 hash23(float3 p3) {
+    p3 = frac3(p3 * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.z, p3.x) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac2(float2(p3.x + p3.y, p3.x + p3.z) * float2(p3.z, p3.y));
+}
+
+// 3 out, 1 in
+float3 hash31(float p) {
+    float3 p3 = frac3(float3(p, p, p) * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.z, p3.x) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac3(float3(p3.x + p3.x, p3.x + p3.y, p3.y + p3.z) * float3(p3.z, p3.y, p3.x));
+}
+
+// 3 out, 2 in
+float3 hash32(float2 p) {
+    float3 p3 = frac3(float3(p.x, p.y, p.x) * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.x, p3.z) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac3(float3(p3.x + p3.x, p3.x + p3.y, p3.y + p3.z) * float3(p3.z, p3.y, p3.x));
+}
+
+// 3 out, 3 in
+float3 hash33(float3 p3) {
+    p3 = frac3(p3 * float3(0.1031f, 0.1030f, 0.0973f));
+    float d = dot(p3, float3(p3.y, p3.x, p3.z) + 33.33f);
+    p3.x += d; p3.y += d; p3.z += d;
+    return frac3(float3(p3.x + p3.x, p3.x + p3.y, p3.y + p3.x) * float3(p3.z, p3.y, p3.x));
+}
+
+// 4 out, 1 in
+float4 hash41(float p) {
+    float4 p4 = frac4(float4(p, p, p, p) * float4(0.1031f, 0.1030f, 0.0973f, 0.1099f));
+    float d = dot(p4, float4(p4.w, p4.z, p4.x, p4.y) + 33.33f);
+    p4.x += d; p4.y += d; p4.z += d; p4.w += d;
+    return frac4(float4(p4.x + p4.x, p4.x + p4.y, p4.y + p4.z, p4.y + p4.w) * float4(p4.z, p4.y, p4.w, p4.x));
+}
+
+// 4 out, 2 in
+float4 hash42(float2 p) {
+    float4 p4 = frac4(float4(p.x, p.y, p.x, p.y) * float4(0.1031f, 0.1030f, 0.0973f, 0.1099f));
+    float d = dot(p4, float4(p4.w, p4.z, p4.x, p4.y) + 33.33f);
+    p4.x += d; p4.y += d; p4.z += d; p4.w += d;
+    return frac4(float4(p4.x + p4.x, p4.x + p4.y, p4.y + p4.z, p4.y + p4.w) * float4(p4.z, p4.y, p4.w, p4.x));
+}
+
+// 4 out, 3 in
+float4 hash43(float3 p) {
+    float4 p4 = frac4(float4(p.x, p.y, p.z, p.x) * float4(0.1031f, 0.1030f, 0.0973f, 0.1099f));
+    float d = dot(p4, float4(p4.w, p4.z, p4.x, p4.y) + 33.33f);
+    p4.x += d; p4.y += d; p4.z += d; p4.w += d;
+    return frac4(float4(p4.x + p4.x, p4.x + p4.y, p4.y + p4.z, p4.y + p4.w) * float4(p4.z, p4.y, p4.w, p4.x));
+}
+
+// 4 out, 4 in
+float4 hash44(float4 p4) {
+    p4 = frac4(p4 * float4(0.1031f, 0.1030f, 0.0973f, 0.1099f));
+    float d = dot(p4, float4(p4.w, p4.z, p4.x, p4.y) + 33.33f);
+    p4.x += d; p4.y += d; p4.z += d; p4.w += d;
+    return frac4(float4(p4.x + p4.x, p4.x + p4.y, p4.y + p4.z, p4.y + p4.w) * float4(p4.z, p4.y, p4.w, p4.x));
+}

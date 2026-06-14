@@ -1,0 +1,85 @@
+#include "$HIP/scripts/vex/include/remapping.vfl"
+#include "$HIP/scripts/vex/include/smin.vfl"
+
+vector ring_size = detail(1, "bb_sze");
+
+float ring_width = ring_size.z;
+int num_points = npoints(0);
+
+float rot_x = radians(20.0);
+float cumulative_z = 0;
+
+
+float time = @Time;
+time -= 5.0;
+
+float an = max(time, 0);
+an = smin_cube(an, 4.5, 0.5);
+
+an *= 0.25; 
+
+int median = int((num_points-1) * 0.5);
+
+for(int i = 0; i <= median; i++) {
+
+    vector pos = point(0, 'P', i);
+    
+    pos.z = cumulative_z;
+
+    int refid = int((num_points-1)*0.5+i);
+
+    setpointattrib(0, 'P', i, pos, 'set');
+    setpointattrib(0, 'P', refid, -pos, 'set');
+
+    float u = i / float(median);
+    float _u = u;
+    
+
+    float ant = pow(an-0.0065,0.6);
+    
+    _u = -_u + ant;
+    _u *= fit(u,0,0.5,1,0);
+    
+    _u = max(_u, 0);
+
+    float offz = _u * 2.5;
+
+    float anr = an;
+    anr = pow(anr, 0.5);
+
+    anr += fit(i, 0, median, 0, 0.5);
+
+    _u = clamp(-u + anr, 0, 1);
+    _u*= 1.5;
+
+
+    if(i == 0){
+        _u = pow(_u*2.0, 0.75);
+        _u = smin_cube(_u, 1.0, 0.1);
+    }
+
+    // _u = clamp(_u,0,1);
+    _u *= fit(u,0,0.5,1,0);
+
+    float rotation = rot_x * (1.0-_u);
+    
+    vector4 orient = quaternion(rotation, set(1, 0, 0));
+
+    setpointattrib(0, 'orient', i, orient, 'set');
+    setpointattrib(0, 'orient', refid, orient, 'set');
+    
+    float spread = ring_width / max(abs(cos(rotation)), 0.001);
+    
+    cumulative_z += spread + offz;
+}
+
+
+@sizez = cumulative_z;
+i@numi = num_points;
+
+
+
+
+    // setpointattrib(0, 'Cd', i, i==0, 'set');
+    // setpointattrib(0, 'Cd', refid, i==0, 'set');
+    // _u = pow(_u,fit(i, 0, median, 0.250, 1));

@@ -1,0 +1,250 @@
+
+    float _u = u;
+    setpointattrib(0, 'Cd', i, u, 'set');
+
+
+    u = (u + 1) - an;
+    u = lerp(u, 1, fit(_u, 0.5,1.0,0,1));
+    u = clamp(u,0,1);
+
+
+    float ann = (an + 1) * 0.75;
+    ann = smin_cube(ann, 1.1, 0.1);
+
+    offz = (1.0-u) * 3.25;
+
+
+#include "$HIP/scripts/vex/include/remapping.vfl"
+#include "$HIP/scripts/vex/include/smin.vfl"
+
+vector ring_size = detail(1, "bb_sze");
+
+float ring_width = ring_size.z;
+int num_points = npoints(0);
+
+float rot_x = radians(20.0);
+float cumulative_z = 0;
+
+
+float time = @Time;
+float t0 = 20.0;
+float t1 = 25.0;
+
+// float an = fit(time,t0,t1,0,1);
+float an = max(time - t0, 0);
+an *= 0.2;
+
+
+
+for(int i = 0; i < num_points; i++) 
+{
+    vector pos = point(0, 'P', i);
+    pos.z = cumulative_z;
+    setpointattrib(0, 'P', i, pos, 'set');
+
+
+    float u = (i/float(num_points-1)) * 2.0 - 1.0;
+
+    u = abs(u);
+    float _u = u;
+
+    u = (u + 1) - an;
+
+    u = pow(u,4.0);
+    u = lerp(u, 1, fit(_u, 0.5,1.0,0,1));
+
+    u = clamp(u,0,1);
+
+    float offz = (1.0-u);
+
+    float ann = (an + 1) * 0.75;
+    ann = smin_cube(ann, 1.1, 0.1);
+
+    offz *= pow(fit(_u,0,1,ann,1.0),8.0);
+    offz *= 2.0;
+
+
+    u = (_u + 1) - an * 1.125;
+    u = lerp(u, 1, fit(_u, 0.0,0.75,0,1));
+    u = clamp(u,0,1);
+
+
+    float rotation = rot_x * pow(u,1.0);
+
+    vector4 orient = quaternion(rotation, set(1, 0, 0));
+    setpointattrib(0, 'orient', i, orient, 'set');
+    
+
+    float spread = ring_width / max(abs(cos(rotation)), 0.001);
+    cumulative_z += spread + offz;
+}
+
+@sizez = cumulative_z;
+i@numi = num_points;
+
+
+// float offz = (1.0-u) * fit(_u,0,0.06,1,0.005) * 16.0;
+    
+
+
+
+
+#include "$HIP/scripts/vex/include/remapping.vfl"
+#include "$HIP/scripts/vex/include/smin.vfl"
+
+vector ring_size = detail(1, "bb_sze");
+
+float ring_width = ring_size.z;
+int num_points = npoints(0);
+
+float rot_x = radians(20.0);
+float cumulative_z = 0;
+
+
+float time = @Time;
+
+// time -= 20.0;
+
+float an = max(time, 0);
+an *= 0.25;
+
+// an = pow(an,0.3);
+
+
+for(int i = 0; i < num_points; i++) 
+{
+    vector pos = point(0, 'P', i);
+    pos.z = cumulative_z;
+    setpointattrib(0, 'P', i, pos, 'set');
+
+
+    float u = (i/float(num_points-1)) * 2.0 - 1.0;
+    u = abs(u);
+
+
+    float _u = u;
+
+    u = (u + 1) - an;
+    u = lerp(u, 1, fit(_u, 0.5,1.0,0,1));
+
+
+    u = clamp(u,0,1);
+
+    float ann = (an + 1) * 0.75;
+    ann = smin_cube(ann, 1.1, 0.1);
+
+    float offz = (1.0-u);
+    // offz = gain(offz, 2.0);
+
+    offz *= 1.0-pow(_u, 0.5);
+    offz *= 3.25;
+
+
+    // u = (_u + 1) - an * 1.125;
+    // u = lerp(u, 1, fit(_u, 0.0,0.75,0,1));
+    // u = clamp(u,0,1);
+
+    // float f = fit(1-_u, 0,1,1,8);
+
+    float rotation = rot_x * pow(u,1);
+
+    vector4 orient = quaternion(rotation, set(1, 0, 0));
+    setpointattrib(0, 'orient', i, orient, 'set');
+    
+
+    float spread = ring_width / max(abs(cos(rotation)), 0.001);
+    cumulative_z += spread + offz;
+}
+
+@sizez = cumulative_z;
+i@numi = num_points;
+
+
+// float offz = (1.0-u) * fit(_u,0,0.06,1,0.005) * 16.0;
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+//______________________________________________________________________
+
+
+#include "$HIP/scripts/vex/include/remapping.vfl"
+
+int isdiamond = i@group_diamond; 
+
+
+int iid = i@iid;
+float did = ((25 - iid) + 0)%26;
+
+float time = @Time;
+float an;
+float t0, t1;
+
+float scltime = 0.5;
+time *= scltime;
+
+time += 0.45;
+time -= did * 0.2; // delai per index
+
+if(time < 0)
+{
+    removepoint(0, @ptnum,1); // rm pts
+} 
+
+
+matrix xform = 4@transform;
+vector ori = @P; // end pos
+vector pos = ptransform(ori,invert(xform));
+
+//-- transform
+float rotdur = 0.6;
+float rotdel = 0.5;
+float nturns = 1.0;
+float trsdur = 1.0;
+float trsdst = 1.0;
+float mskdur = 0.35;
+
+// rot
+if(isdiamond){
+    an = fit(time-rotdel,0,rotdur,0,1);
+    an = pow(an, 0.5);
+    // pos = qrotate(eulertoquaternion(set(an*nturns*M_PI*-2,0,0),0),pos);
+
+
+    // trans
+    an = fit(time,0,trsdur,0,1);
+    an = primuv(1, "y", 0, an);
+    
+    pos.x += max(1.0-an,0)*trsdst;
+}
+else{
+    // trans
+    time -= trsdur-0.;
+    an = fit(time,0,mskdur,0,1);
+    // an = gain(an,2.0);
+    pos.x += max(an,0)*0.025;
+
+    if(time > mskdur) removepoint(0, @ptnum,1);
+
+
+}
+
+
+// apply mat
+pos = ptransform(pos,xform); 
+
+@P = pos;
+// @Cd = did / 13.0;
+
+@Cd = did/26.0;
+@Cd = 0.5;

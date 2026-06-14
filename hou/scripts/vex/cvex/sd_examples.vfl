@@ -1,0 +1,84 @@
+/*
+    * 3D - SDF
+
+*/
+#include "$HOME/libs/vex/include/sd_shapes_3d.vfl"
+#include "$HOME/libs/vex/include/sd_operations.vfl"
+
+
+float map(vector pos){
+    // return sdRoundCone(pos, 0.4  , 0.2 , 0.5 );
+    return sdTorus(pos, {0.5,0.25});
+}
+
+
+#define _MAP map
+#include "$HOME/libs/vex/include/ray_marching.vfl"
+
+
+cvex sd_shapes_3d(
+    export vector P = {0,0,0};
+    export float density = 0;
+    export vector col = 0;
+    )
+{
+    vector dim = chv("../sd_density_volume/size");
+    float scl = min(dim.x, dim.y);
+    scl*=0.5;
+
+    vector pos = P/scl;
+    float d = 1e6;
+
+    d = map(pos);
+    density = -d * 1.5 ;
+    col = calcNormal(pos,0.05);
+}
+
+
+/*
+    //---------------------------------------------------------- SHAPES
+    // d = sdSphere(pos, 0.2); 
+    // d = sdBox(pos, {0.75, 0.05, 0.5});
+    // vector4 nb = sdNorBox(pos, {0.2, 0.2, 0.35});
+    // d = sdRoundBox(pos,  {0.1, 0.12, 0.35}, 0.1);
+    // d = sdPlane(pos, normalize({0.5 ,1,0.0}), -0.01);
+    // d = sdTorus(pos, {0.25,0.1}); 
+    // d = sdCappedTorus(pos, {0.9,-0.4}, 0.3 , 0.1);
+    d = sdLinkX(pos, 0.1, 0.2, 0.25);
+    // d = sdCylinderInf(pos, {0.1, 0.2, 0.05});
+    // d = sdCone(pos, {0.1, 0.2}, 0.5);
+    // d = sdConeInf(pos, {0.1, 0.2});
+    // d = sdHexPrism(pos, {0.4 , 0.1});
+    // d = sdTriPrism(pos, {0.4 , 0.1});
+    // d = sdCapsule(pos, {0.0,-0.2 ,0.0},{0.0,0.2,0.0},0.12);
+    // d = sdVerticalCapsule(pos, 0.2, 0.05);
+    // d = sdCappedCylinder(pos, 0.2, 0.25);
+    // d = sdCappedCylinder2(pos, {0.25,0,0}, {-0.25,0.2 ,0},0.1);
+    // d = sdRoundedCylinder(pos, 0.2, 0.05  ,0.25);
+    // d = sdCappedCone(pos, 0.1, 0.1  ,0.25);
+    // d = sdCappedCone2(pos, {0.1,0,0}, {-0.1,0,0}, 0.25, 0.1);
+    // d = sdSolidAngle(pos, {1.0, 0.8 }, 0.4); 
+    // d = sdRoundCone(pos, 0.4  , 0.2 , 0.5 );
+    // d = sdRoundCone2(pos,{0.25,0,0}, {-0.25 ,0,0}, 0.25, 0.1);
+    // d = sdEllipsoid(pos,{0.5,0.5 ,0.25});
+    // d = sdRhombus(pos,0.4 ,0.5 ,0.2,0.1);
+    // d = sdOctahedron(pos,0.5 );
+    // d = sdPyramid(pos, 0.75 );
+    // d = sdTriangle(pos, {0.25,0,0}, {-0.25,0,0.25}, {-0.25,0,-0.25} );
+    // d = sdQuad(pos,{-0.45,0,0.45},{0.45,0,0.45},{0.45,0,-0.45},{-0.45,0,-0.45});
+
+
+    //---------------------------------------------------------- OP
+    // float d2 = sdRoundCone(pos, 0.3, 0.2, 0.3);
+    // d = opSmoothUnion(d,d2,0.2);
+    // d = opSmoothSubtraction(d,d2,0.2 );
+    // d = opSmoothIntersection(d,d2,0.2);
+
+
+    //---------------------------------------------------------- OP
+    // float d2 = sdRoundCone(pos, 0.3, 0.2, 0.3);
+    // d = opSmoothUnion(d,d2,0.2);
+    // d = opSmoothSubtraction(d,d2,0.2 );
+    // d = opSmoothIntersection(d,d2,0.2); 
+
+*/

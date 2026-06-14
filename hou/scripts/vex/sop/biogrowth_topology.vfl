@@ -1,0 +1,171 @@
+// INVARIANT (split-streams refactor):
+// Tree_node ptnums are stable across frames. Topology may only APPEND
+// children — never delete, never reorder. parent_id stored as @ptnum
+// at spawn time stays valid forever. Don't break this without reviving
+// stable_id machinery.
+
+// if (i@is_tree_node < 1) return;
+// if (i@active < 1) return;         // ← skip dead nodes (allometric/cull may have killed them this frame)
+
+
+// ----- Tip extension: linear growth along arc-length ----------------------
+if (i@is_tip == 1 && f@arc_since_spawn >= chf("step_size")) 
+{
+    int child = addpoint(0, v@P);
+    setpointattrib(0, "is_tree_node",    child, 1);
+    setpointattrib(0, "is_attractor",    child, 0);
+    setpointattrib(0, "is_tip",          child, 1);
+    setpointattrib(0, "active",          child, 1);
+    setpointattrib(0, "velocity",        child, v@velocity * chf("child_velocity_inherit"));
+    setpointattrib(0, "arc_since_spawn", child, 0.0);
+    
+    setpointattrib(0, "att_ix",    child, 0);
+    setpointattrib(0, "att_iy",    child, 0);
+    setpointattrib(0, "att_iz",    child, 0);
+    setpointattrib(0, "att_count", child, 0);
+
+    setpointattrib(0, "force_acc", child, {0, 0, 0});
+
+    setpointattrib(0, "split_depth",      child, i@split_depth);       // inherit parent's depth
+    setpointattrib(0, "lateral_pressure", child, 0.0);
+    setpointattrib(0, "last_att_force",   child, {0, 0, 0});
+
+    setpointattrib(0, "parent_id",     child, @ptnum);
+
+    setpointattrib(0, "branch_radius", child, f@branch_radius);  // mainline: inherit unchanged
+    setpointattrib(0, "is_lateral_start", child, 0);
+    setpointattrib(0, "murray_acc", child, 0);
+
+    //mcmahon
+    setpointattrib(0, "arc_total_since_lateral", child, f@arc_total_since_lateral);
+    // phyllo
+    setpointattrib(0, "lateral_count", child, i@lateral_count);
+    setpointattrib(0, "phyllo_index", child, i@phyllo_index + 1);
+    //apical dominance
+    setpointattrib(0, "dominance_acc", child, 0);
+    setpointattrib(0, "dominance",     child, 0.0);
+    // damage
+    setpointattrib(0, "damage", child, f@damage);
+
+    int prim = addprim(0, "polyline");
+    addvertex(0, prim, @ptnum);
+    addvertex(0, prim, child);
+
+    i@is_tip           = 0;
+    v@velocity        = {0, 0, 0};
+    f@arc_since_spawn -= chf("step_size");
+    return;
+}
+
+// ----- Interior branching: vigor-gated lateral spawn ---------------------
+if (i@is_tip == 0 && i@att_count > 0 && i@lateral_count < chi("max_laterals_per_node")) 
+{
+    float threshold = chf("lateral_base_threshold")
+                    * (1.0 + float(i@split_depth) * chf("vigor_penalty") * (ch("vigor_filter_enable") > 0) )
+                    * (1.0 + chf("dominance_k") * f@dominance * (ch("dominance_enable") > 0));
+
+
+    if (f@lateral_pressure >= threshold)
+    {
+        vector dir, init_v;
+
+        if (ch("phyllo_enable") > 0 || ch("leonardo_enable") > 0){
+
+            // ----- Shared: parent tangent (velocity=0 on interior, reconstruct from parent_id) -----
+            vector tangent = {0, 1, 0};
+            int pid = i@parent_id;
+            if (pid >= 0) {
+                vector t = v@P - point(0, "P", pid);
+                if (length2(t) > 1e-12) tangent = normalize(t);
+            }
+
+            // ----- Azimuth: phyllo spiral when enabled, else attractor projection -----
+            vector azimuth;
+            if (ch("phyllo_enable") > 0) {
+                vector base = cross(tangent, {0, 1, 0});
+                if (length2(base) < 1e-6) base = cross(tangent, {1, 0, 0});
+                base = normalize(base);
+                matrix3 rot = ident();
+                rotate(rot, radians(chf("phyllo_angle")) * float(i@phyllo_index), tangent);
+                azimuth = normalize(base * rot);
+            } 
+            else {
+                // Attractor projected perpendicular to tangent
+                vector att = v@last_att_force - dot(v@last_att_force, tangent) * tangent;
+                if (length2(att) < 1e-6) {
+                    att = cross(tangent, {0, 1, 0});
+                    if (length2(att) < 1e-6) att = cross(tangent, {1, 0, 0});
+                }
+                azimuth = normalize(att);
+            }
+
+            // ----- Pitch: leonardo geometric, else user-dialed lerp -----
+            if (ch("leonardo_enable") > 0) {
+                float r_parent  = max(f@branch_radius, 1e-6);
+                float r_lateral = chf("base_radius") * chf("taper_decay");
+                float ratio     = clamp(r_lateral / r_parent, 0.0, 1.0);
+                float theta     = acos(ratio * ratio);
+                dir = normalize(azimuth * sin(theta) + tangent * cos(theta));
+            } else {
+                dir = normalize(lerp(azimuth, tangent, chf("lateral_pitch")));
+            }
+        }
+        else{
+            dir    = normalize(v@last_att_force);
+        }
+
+
+        init_v = dir * chf("lateral_speed_init");
+
+
+        int child = addpoint(0, @P);
+        setpointattrib(0, "is_tree_node",    child, 1);
+        setpointattrib(0, "is_attractor",    child, 0);
+        setpointattrib(0, "is_tip",          child, 1);
+        setpointattrib(0, "active",          child, 1);
+        setpointattrib(0, "velocity",        child, init_v);
+        setpointattrib(0, "arc_since_spawn", child, 0.0);
+
+        setpointattrib(0, "att_ix",    child, 0);
+        setpointattrib(0, "att_iy",    child, 0);
+        setpointattrib(0, "att_iz",    child, 0);
+        setpointattrib(0, "att_count", child, 0);
+
+        setpointattrib(0, "force_acc", child, {0, 0, 0});
+
+        setpointattrib(0, "split_depth",      child, i@split_depth + 1);  // lateral increments
+        setpointattrib(0, "lateral_pressure", child, 0.0);
+        setpointattrib(0, "last_att_force",   child, {0, 0, 0});
+
+        setpointattrib(0, "parent_id",     child, @ptnum);
+
+        setpointattrib(0, "branch_radius", child, chf("base_radius") * chf("taper_decay"));
+        setpointattrib(0, "is_lateral_start", child, 1);
+        setpointattrib(0, "murray_acc", child, 0);
+
+        setpointattrib(0, "arc_total_since_lateral", child, 0.0);
+
+        //phylotaxie
+        setpointattrib(0, "lateral_count", child, 0);
+        setpointattrib(0, "phyllo_index", child, 0 );
+        //apical dominance
+        setpointattrib(0, "dominance_acc", child, 0);
+        setpointattrib(0, "dominance",     child, 0.0);
+        // damage
+        setpointattrib(0, "damage", child, f@damage);
+
+
+        int prim = addprim(0, "polyline");
+        addvertex(0, prim, @ptnum);
+        addvertex(0, prim, child);
+
+        // Increment count on THIS node (for next lateral from the same interior).
+        i@lateral_count = i@lateral_count + 1;
+        
+        // Reset parent's pressure so it doesn't re-spawn every frame.
+        // (att_* is reset every frame by vigor_accumulate — not here.)
+        f@lateral_pressure = 0;
+        v@last_att_force   = {0, 0, 0};
+        i@att_count = 0;
+    }
+}

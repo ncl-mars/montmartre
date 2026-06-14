@@ -1,0 +1,1 @@
+WARNING, these are copies of OpenCL nodes snippets for development purposes (overall script comprehension), they never get loaded in houdini

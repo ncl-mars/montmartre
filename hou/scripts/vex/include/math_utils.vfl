@@ -1,0 +1,18 @@
+#ifndef MATH_UTILS
+    #define MATH_UTILS
+
+
+    float dot2( vector2 v ) { return dot(v,v); }
+    float dot2( vector v ) { return dot(v,v); }
+    float ndot( vector2 a; vector2 b ) { return a.x*b.x - a.y*b.y; }
+
+    float cro( vector2 a; vector2 b ){ return a.x*b.y-a.y*b.x; }
+
+
+    float maxcomp(vector v){ return max(max(v.x,v.y), v.z); }
+
+    vector limit(vector v; float maxlen){ 
+        return normalize(v)*min(length(v),maxlen); 
+    }
+
+#endif

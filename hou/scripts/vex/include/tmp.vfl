@@ -1,0 +1,126 @@
+#include "$HIP/scripts/vex/include/math_utils.vfl"
+
+vector pos = @P;
+
+float t0 = 30;
+float t1 = t0 + 100;
+
+
+vector bb = getbbox_size(0) ;
+vector scl = set(0.7);
+
+vector F = pos / bb;
+F += set(0.5);
+F.z = 1.0-F.z;
+
+
+
+float an = fit(@Frame, t0, t1 + 2, 0, 1);
+
+scl.z += F.z * 4.25 * an;
+scl.z = min(scl.z, 2.5);
+
+
+an = fit(@Frame, t0+30, t1+20, 0, 1);
+float fx = max(F.z-(1.0-an)*0.5, 0) * 1;
+
+
+fx *= 4;
+scl.x += fx * an;
+scl.x += (1.0-F.z)*0.5;
+
+
+float fy = F.y;
+// fy *= F.z;
+
+an = fit(@Frame, t0+20, t1+30, 0, 1);
+
+fy *= rampToTri(F.z-0.325);
+// fy *= pow(F.z, 3);
+scl.y += fy * 20 * an;
+
+
+float f = lerp(0.5, 1, an);;
+scl *= set(f,f,1);
+
+
+pos *= scl;
+pos.z = min(pos.z, bb.z * 0.45);
+
+
+an = fit(@Frame, t0+40, t1+50, 0, 1);
+
+vector pivot = set(0,0,bb.z * 0.5);
+
+
+float ang = an * M_PI * 0.25; 
+matrix trs = ident();
+translate(trs, -pivot);
+rotate(trs, ang, 1);
+
+
+
+ang = fit(@Frame, 50, 80, 1, 0) * M_PI * -0.01;
+// rotate(trs, ang, 2);
+
+
+translate(trs, pivot);
+
+pos = ptransform(pos, trs);
+
+
+t0 = 130;
+t1 = 160;
+
+an = fit(@Frame, 130, 200, 0, 1);
+trs = ident();
+rotate(trs, M_PI * 0.25,1);
+vector dir = ptransform(set(0,0,-1), trs);
+
+// pos += dir * set(an);
+
+
+pos.y = max(pos.y, -bb.y*0.2 + an);
+
+f@friction = 0;
+@P = pos;
+
+return;
+
+
+
+
+
+an = fit(@Frame, t0, t1, 0, 1);
+
+scl.z += F.z * 4 * an;
+
+
+an = fit(@Frame, t0+7, t1+20, 0, 1);
+
+// scl.y += F.y * max(pow(F.z,12),0) * 32 * an;
+
+float fy = F.y;
+
+// fy = 1.0-fy;
+// fy = trunc_fallof(fy, 0.5);
+// fy *= F.z;
+fy *= pow(F.z, 8);
+
+
+scl.y += fy * 10 * an;
+// scl.y += F.y * max(pow(F.z,12),0) * 32 * an;
+
+
+// @Cd = gain(F.y, 8);
+
+
+float an2 = fit(@Frame, t0+30, t1+5, 0, 1);
+
+float fx = max(pow(F.z, lerp(24, 4, an2)),0) * 12;
+scl.x += fx * an;
+
+
+
+
+

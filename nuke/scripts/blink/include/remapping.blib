@@ -1,0 +1,109 @@
+// BlinkScript remapping & shaping functions
+// Converted from OpenCL remapping.cl
+// Most functions from https://iquilezles.org/articles/functions/
+
+float mapTo01(float imin, float imax, float x) {
+    return (x - imin) / (imax - imin);
+}
+
+float mapRange(float imin, float imax, float omin, float omax, float x) {
+    return mapTo01(imin, imax, x) * (omax - omin) + omin;
+}
+
+float saturatectr(float x) { return clamp(x, -1.0f, 1.0f); }
+
+float rampToTri(float x) {
+    return min(x, -x + 1.0f) * 2.0f;
+}
+
+float almostIdentity(float x, float m, float n) {
+    if (x > m) return x;
+    float a = 2.0f * n - m;
+    float b = 2.0f * m - 3.0f * n;
+    float t = x / m;
+    return (a * t + b) * t * t + n;
+}
+
+float almostIdentitySqrt(float x, float n) {
+    return sqrt(x * x + n * n);
+}
+
+float integralSmoothstep(float x, float T) {
+    if (x > T) return x - T / 2.0f;
+    return x * x * x * (1.0f - x * 0.5f / T) / T / T;
+}
+
+float expImpulse(float x, float k) {
+    float h = k * x;
+    return h * exp(1.0f - h);
+}
+
+float quaImpulse(float k, float x) {
+    return 2.0f * sqrt(k) * x / (1.0f + k * x * x);
+}
+
+float polyImpulse(float k, float n, float x) {
+    return (n / (n - 1.0f)) *
+           pow((n - 1.0f) * k, 1.0f / n) *
+           x / (1.0f + k * pow(x, n));
+}
+
+float expSustainedImpulse(float x, float f, float k) {
+    float s = max(x - f, 0.0f);
+    return min(x * x / (f * f), 1.0f + (2.0f / f) * s * exp(-k * s));
+}
+
+float sinc(float x, float k) {
+    float a = 3.1415926535897932f * (k * x - 1.0f);
+    return sin(a) / a;
+}
+
+float trunc_fallof(float x, float m) {
+    x /= m;
+    return (x - 2.0f) * x + 1.0f;
+}
+
+float almostUnitIdentity(float x) {
+    return x * x * (2.0f - x);
+}
+
+float iqGain(float x, float k) {
+    float a = 0.5f * pow(2.0f * ((x < 0.5f) ? x : 1.0f - x), k);
+    return (x < 0.5f) ? a : 1.0f - a;
+}
+
+float parabola(float x, float k) {
+    return pow(4.0f * x * (1.0f - x), k);
+}
+
+float pcurve(float x, float a, float b) {
+    float k = pow(a + b, a + b) / (pow(a, a) * pow(b, b));
+    return k * pow(x, a) * pow(1.0f - x, b);
+}
+
+float tone(float x, float k) {
+    return (k + 1.0f) / (1.0f + k * x);
+}
+
+float cubicPulse(float c, float w, float x) {
+    x = fabs(x - c);
+    if (x > w) return 0.0f;
+    x /= w;
+    return 1.0f - x * x * (3.0f - 2.0f * x);
+}
+
+float rationalBump(float x, float k) {
+    return 1.0f / (1.0f + k * x * x);
+}
+
+float expStep(float x, float n) {
+    return pow(2.0f, -pow(2.0f, n) * pow(x, n));
+}
+
+float3 spherize(float3 pos, float radius, float blend) {
+    float len = length(pos);
+    if (len < 1e-6f) return pos;
+    float3 dir = normalize(pos);
+    float3 sphere_pos = dir * radius;
+    return lerp(pos, sphere_pos, clamp(blend, 0.0f, 1.0f));
+}

@@ -1,0 +1,23 @@
+// BlinkScript polar/spherical coordinate conversions
+// Converted from OpenCL polar.cl
+
+inline float2 cartToPol2(float2 p) {
+    return float2(length(p), atan2(p.y, p.x));
+}
+
+inline float2 polToCart2(float2 p) {
+    return float2(p.x * cos(p.y), p.x * sin(p.y));
+}
+
+inline float3 cartToPol3(float3 p) {
+    float r = length(p);
+    return float3(r, atan2(p.y, p.x), acos(p.z / r));
+}
+
+inline float3 polToCart3(float3 p) {
+    return float3(
+        p.x * sin(p.z) * cos(p.y),
+        p.x * sin(p.z) * sin(p.y),
+        p.x * cos(p.z)
+    );
+}

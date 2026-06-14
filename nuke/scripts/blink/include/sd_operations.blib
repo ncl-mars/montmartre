@@ -1,0 +1,77 @@
+// BlinkScript SDF boolean operations
+// Converted from OpenCL sd_operations.cl
+
+// OP UNION
+inline float sdfOpUnion(float d1, float d2) {
+    return min(d1, d2);
+}
+
+inline float sdfOpUnionSmooth(float d1, float d2, float k) {
+    if (k == 0.0f) return min(d1, d2);
+    float h = max(k - fabs(d1 - d2), 0.0f);
+    return min(d1, d2) - h * h * 0.25f / k;
+}
+
+inline float sdfOpUnionRound(float d1, float d2, float k) {
+    float2 u = float2(max(k - d1, 0.0f), max(k - d2, 0.0f));
+    return max(k, min(d1, d2)) - length(u);
+}
+
+inline float sdfOpUnionChamfer(float d1, float d2, float k) {
+    return min(min(d1, d2), (d1 - k + d2) * sqrt(0.5f));
+}
+
+// OP INTERSECT
+inline float sdfOpIntersect(float d1, float d2) {
+    return max(d1, d2);
+}
+
+inline float sdfOpIntersectSmooth(float d1, float d2, float k) {
+    return -sdfOpUnionSmooth(-d1, -d2, k);
+}
+
+inline float sdfOpIntersectRound(float d1, float d2, float k) {
+    float2 u = float2(max(k + d1, 0.0f), max(k + d2, 0.0f));
+    return min(-k, max(d1, d2)) + length(u);
+}
+
+inline float sdfOpIntersectChamfer(float d1, float d2, float k) {
+    return max(max(d1, d2), (d1 + k + d2) * sqrt(0.5f));
+}
+
+// OP SUBTRACT
+inline float sdfOpSubtract(float d1, float d2) {
+    return sdfOpIntersect(d1, -d2);
+}
+
+inline float sdfOpSubtractSmooth(float d1, float d2, float k) {
+    return sdfOpIntersectSmooth(d1, -d2, k);
+}
+
+inline float sdfOpSubtractRound(float d1, float d2, float k) {
+    return sdfOpIntersectRound(d1, -d2, k);
+}
+
+inline float sdfOpSubtractChamfer(float d1, float d2, float k) {
+    return sdfOpIntersectChamfer(d1, -d2, k);
+}
+
+// OP DIFFERENCE
+inline float sdfOpDifference(float d1, float d2) {
+    return max(min(d1, d2), -max(d1, d2));
+}
+
+inline float sdfOpDifferenceSmooth(float d1, float d2, float k) {
+    if (k == 0.0f) return sdfOpDifference(d1, d2);
+    float h = max(k - fabs(d1 - d2), 0.0f);
+    float l = h * h * 0.25f / k;
+    return max(min(d1, d2) - l, -max(d1, d2) - l);
+}
+
+inline float sdfOpDifferenceRound(float d1, float d2, float k) {
+    return min(sdfOpIntersectRound(-d1, d2, k), sdfOpIntersectRound(d1, -d2, k));
+}
+
+inline float sdfOpDifferenceChamfer(float d1, float d2, float k) {
+    return min(sdfOpIntersectChamfer(-d1, d2, k), sdfOpIntersectChamfer(d1, -d2, k));
+}

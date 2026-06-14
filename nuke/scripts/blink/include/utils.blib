@@ -1,0 +1,28 @@
+// BlinkScript utility functions
+// Converted from OpenCL utils.cl
+
+float frac(float x)  { return x - floor(x); }
+float2 frac2(float2 x) { return float2(x.x - floor(x.x), x.y - floor(x.y)); }
+float3 frac3(float3 x) { return float3(x.x - floor(x.x), x.y - floor(x.y), x.z - floor(x.z)); }
+float4 frac4(float4 x) { return float4(x.x - floor(x.x), x.y - floor(x.y), x.z - floor(x.z), x.w - floor(x.w)); }
+
+float mod(float x, float y) { return x - y * floor(x / y); }
+
+float maxComp(float2 v) { return max(v.x, v.y); }
+float maxComp(float3 v) { return max(max(v.x, v.y), v.z); }
+
+float dot22(float2 v) { return dot(v, v); }
+float dot23(float3 v) { return dot(v, v); }
+
+float ndot(float2 a, float2 b) { return a.x * b.x - a.y * b.y; }
+
+
+float2 fabs2(float2 v) { return float2(fabs(v.x), fabs(v.y)); }
+float3 fabs3(float3 v) { return float3(fabs(v.x), fabs(v.y), fabs(v.z)); }
+float4 fabs4(float4 v) { return float4(fabs(v.x), fabs(v.y), fabs(v.z), fabs(v.w)); }
+float2 max2(float2 v, float s) { return float2(max(v.x, s), max(v.y, s)); }
+float3 max3(float3 v, float s) { return float3(max(v.x, s), max(v.y, s), max(v.z, s)); }
+
+float smoothstep(float edge0, float edge1, float x) { float t = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f); return t * t * (3.0f - 2.0f * t); }
+float step(float edge, float x) { return (x >= edge) ? 1.0f : 0.0f; }
+float4 step4(float4 edge, float4 x) { return float4((x.x >= edge.x) ? 1.0f : 0.0f, (x.y >= edge.y) ? 1.0f : 0.0f, (x.z >= edge.z) ? 1.0f : 0.0f, (x.w >= edge.w) ? 1.0f : 0.0f); }

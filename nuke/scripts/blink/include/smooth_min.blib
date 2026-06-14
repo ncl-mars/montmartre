@@ -1,0 +1,61 @@
+// BlinkScript smooth minimum functions
+// Converted from OpenCL smooth_min.cl
+// https://iquilezles.org/articles/smin/
+
+// -------------------------------------------- Direct Difference Family
+
+// exponential
+inline float smin_exp(float a, float b, float k) {
+    k *= 1.0f;
+    float r = pow(2.0f, -a / k) + pow(2.0f, -b / k);
+    return -k * log2(r);
+}
+
+// root
+inline float smin_root(float a, float b, float k) {
+    k *= 2.0f;
+    float x = b - a;
+    return 0.5f * (a + b - sqrt(x * x + k * k));
+}
+
+// sigmoid
+inline float smin_sigm(float a, float b, float k) {
+    k *= log(2.0f);
+    float x = b - a;
+    return a + x / (1.0f - pow(2.0f, x / k));
+}
+
+// quadratic polynomial
+inline float smin_quad(float a, float b, float k) {
+    k *= 4.0f;
+    float h = max(k - fabs(a - b), 0.0f) / k;
+    return min(a, b) - h * h * k * (1.0f / 4.0f);
+}
+
+// cubic polynomial
+inline float smin_cube(float a, float b, float k) {
+    k *= 6.0f;
+    float h = max(k - fabs(a - b), 0.0f) / k;
+    return min(a, b) - h * h * h * k * (1.0f / 6.0f);
+}
+
+// quartic polynomial
+inline float smin_quart(float a, float b, float k) {
+    k *= 16.0f / 3.0f;
+    float h = max(k - fabs(a - b), 0.0f) / k;
+    return min(a, b) - h * h * h * (4.0f - h) * k * (1.0f / 16.0f);
+}
+
+// circular
+inline float smin_circ(float a, float b, float k) {
+    k *= 1.0f / (1.0f - sqrt(0.5f));
+    float h = max(k - fabs(a - b), 0.0f) / k;
+    return min(a, b) - k * 0.5f * (1.0f + h - sqrt(1.0f - h * (h - 2.0f)));
+}
+
+// circular geometrical
+inline float smin_circ_geo(float a, float b, float k) {
+    k *= 1.0f / (1.0f - sqrt(0.5f));
+    float2 v = float2(max(k - a, 0.0f), max(k - b, 0.0f));
+    return max(k, min(a, b)) - length(v);
+}
