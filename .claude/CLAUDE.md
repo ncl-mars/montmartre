@@ -57,3 +57,17 @@ Start at [doc/README.md](../doc/README.md).
 - Prefer reusing existing include helpers over re-deriving math inline.
 - When adding a new `include/*.cl`, give it a unique `NAME_CL` guard and `#include "./utils.cl"`
   for shared math rather than copying it.
+
+## Version control — what's tracked (DCC files)
+Git holds the **canonical/irreplaceable** and the **library** layer — never disposable working files.
+- **Houdini:** track exactly **one lightweight lib/demo `.hip` per studio tech** — for BioGrowth, a
+  dedicated **demo file** (`hou/biogrowth.hiplc`, to be created) that shows the donor SCA solver and
+  carries its canonical code/node construction. Keep it light: **NO embedded geometry; all caches to
+  external files** (`.bgeo`/`.vdb`/…, gitignored). **Production assets and shot scenes are NOT tracked** —
+  including **`hou/lichens.hiplc`** (the lichen *element* used in shots) and `shots/**/hou/`,
+  `elements/**/hou/` working files — versioned by incremental filename on disk.
+- **Nuke:** the canonical Blink code lives in `nuke/scripts/blink/` (tracked); **comps (`.nk`/`.nkind`)
+  and Studio/Hiero projects (`.hrox`/`.hroxind`) are NOT tracked** (disposable working files).
+- **Also tracked:** docs, the OCL/VEX/Blink libraries, `config/` (OCIO + custom IDTs), small interchange
+  (solved cameras `.abc`, AAF/XML/EDL). **Ignored:** media / frames / renders / caches.
+See [project-structure.md](../doc/pipeline/project-structure.md) "Version control boundary".

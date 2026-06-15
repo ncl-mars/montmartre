@@ -3,17 +3,22 @@
 # Versioned: code, docs, configs, scripts/libraries, exchange (AAF/XML/EDL),
 #            .drp project backups, solved cameras.
 # Ignored:   media (frames/video/geo/caches), renders, outputs, the CG library.
-# (Repo not yet initialised — prepared for a clean `git init` later.)
+# NOTE: git does NOT support trailing inline comments — a `#` after a pattern
+#       becomes part of the pattern and silently breaks the rule. Keep every
+#       comment on its own line.
 # ──────────────────────────────────────────────────────────────────────────
 
 # ── IDE / tools ──
 .vscode/
-# .claude/        (tracked)
+# .claude/  is tracked
 
 # ── OS / temp ──
 .DS_Store
 Thumbs.db
 *.swp
+# editor / DCC backup & autosave files (e.g. comp_v001.nkind~, tracking.nkind.autosave)
+*~
+*.autosave
 .tmp/
 tmp/
 
@@ -24,7 +29,8 @@ backup/
 *.hip.bak
 *.hiplc.bak
 *.hipnc.bak
-hou/scripts/ocl/hou_lib/    # vendored SideFX OCL libs (clones — not our IP, re-obtainable from Houdini)
+# vendored SideFX OCL libs (clones — not our IP, re-obtainable from Houdini)
+hou/scripts/ocl/hou_lib/
 
 # ── Heavy folders: caches / renders / outputs / finishing ──
 **/cache/
@@ -42,12 +48,30 @@ _backup/
 # ── Reusable CG library (heavy — kept on storage) ──
 assets/
 
+# ── Camera dailies / ingest (heavy — masters kept on external storage) ──
+footage/
+
 # ── DCC app working dirs (heavy) ──
 blend/
 comfy/
 adobe/
 davinci/
-nuke/comp/            # Nuke comp renders/temp (comp scripts live in shots/<EP>/<SH>/comp)
+# Nuke comp renders/temp (comp scripts live in shots/<EP>/<SH>/comp)
+nuke/comp/
+
+# Nuke working files (disposable; canonical Blink code lives in nuke/scripts/blink)
+*.nk
+*.nknc
+*.nkind
+*.hrox
+*.hroxind
+
+# Houdini scenes are production assets / working files — NOT tracked, EXCEPT the
+# lightweight studio-tech demo(s) re-included below. lichens.hiplc = production element → ignored.
+*.hip
+*.hipnc
+*.hiplc
+!hou/biogrowth.hiplc
 
 # ── Heavy media by extension (anywhere) ──
 # frames / images

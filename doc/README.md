@@ -31,6 +31,7 @@ Project-specific workflow, shoot → delivery. Evolves per shot.
 - [lookdev-render.md](pipeline/lookdev-render.md) — shading in Houdini MaterialX → Karma XPU (Blender/Cycles = mood reference)
 - [color-management.md](pipeline/color-management.md) — ACES/OCIO across Houdini→Nuke→Resolve (shared config)
 - [delivery-spec.md](pipeline/delivery-spec.md) — delivery/mastering for the spec piece: web/showreel; Resolve log grading
+- [production-tracking.md](pipeline/production-tracking.md) — Kitsu evaluation for FLAT (production tracking; deferred)
 
 ## [reference/](reference/) — tool & language facts
 Static, reusable reference for the tools. Canonical.

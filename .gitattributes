@@ -1,0 +1,9 @@
+# Nuke Indie project/comp files are license-locked and must stay byte-exact.
+# Mark binary so git never applies EOL conversion, diff, or merge to them.
+*.nkind   binary
+*.hroxind binary
+
+# Houdini scenes — binary, no EOL conversion / diff
+*.hip   binary
+*.hiplc binary
+*.hipnc binary

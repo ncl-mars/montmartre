@@ -40,10 +40,15 @@ Panels → Node Graph / Viewer*; entries marked _(verify)_ are version/preferenc
 
 | Action | Shortcut |
 |---|---|
-| Play forward / reverse / stop | `L` / `J` / `K` |
-| Previous / next frame | `←` / `→` |
-| Jump to start / end of range | `Alt + ←` / `Alt + →` _(verify)_ |
-| Set in / out points | `I` / `O` _(verify)_ |
+| Play forward / backward / stop | `L` / `J` / `K` |
+| Faster playback (step up through speeds) | Tap `L` (forward) or `J` (reverse) **repeatedly** — each press speeds up |
+| Next / previous frame | `→` / `←` |
+| Jump to a specific frame | Click the **current-frame field** (bottom of the Viewer) and type the number |
+| First / last frame of range | Transport buttons `⏮` / `⏭` on the Viewer timeline (no default key in stock Nuke) |
+| Previous / next keyframe (animated knob) | `Alt + ←` / `Alt + →` _(verify)_ |
+| Set playback **in / out** range | Drag the green range handles on the timeline, or type into the in/out fields by the transport |
+| Loop / bounce / play-once mode | Toggle via the playback-mode button in the Viewer transport |
+| Global project frame range (1–N) | `S` → Project Settings → `frame range` |
 
 ## General / workflow
 
