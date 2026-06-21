@@ -23,7 +23,7 @@ PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX ele
 │       ├── blender/              mood / look-intent in Cycles (ref for Houdini MaterialX) + ref modeling
 │       └── ref/  tex/            species reference (Usnea / Cladonia), textures
 │
-├── shots/                        EP## / SH### — Paris rooftop plates (S-Log2 / S-Gamut)
+├── shots/                        EP## / SH### — Paris rooftop plates (A7R V S-Log3; A7 II S-Log2 legacy)
 │   └── EP01/SH010/
 │       ├── plate/  ref/          camera-original footage, HDRIs, photogrammetry (chimney stills), lens grid
 │       ├── track/  cam/          Nuke track → solved camera (.abc/.usd) + STMap
@@ -54,9 +54,9 @@ PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX ele
 - **Element:** the lichen element — a fork of the BioGrowth studio techno → `elements/lichen/`.
   3–5 species, inter-species interaction, massive coverage. See [../lichen/todo.md](../lichen/todo.md).
 - **Plates:** digital capture, **Paris rooftops** — urban zinc/stone surfaces, hero subject the chimneys
-  outside the flat (strong texture/detail for the solve and for photogrammetry). Camera: **Sony A7 II**
-  (8-bit S-Log2 / S-Gamut video; RAW stills for chimney photogrammetry) + Zeiss primes (20 / 35 / 55). See
-  [camera-tracking.md](camera-tracking.md), [film-emulation.md](film-emulation.md).
+  outside the flat (strong texture/detail for the solve and for photogrammetry). Primary camera: **Sony A7R V**
+  (10-bit S-Log3 / S-Gamut3, up to 8K, MP4) on a **DJI RS gimbal**; **A7 II** (8-bit S-Log2) legacy. 61 MP RAW
+  stills for chimney photogrammetry. See [camera-tracking.md](camera-tracking.md), [film-emulation.md](film-emulation.md).
 - **Render:** Karma XPU; shading authored in **Houdini MaterialX** (Blender/Cycles = mood / look-intent
   reference on the AD side, not production materials). See [lookdev-render.md](lookdev-render.md).
 - **Finishing:** in-house **edit + cut + grade** (Resolve, ACEScct) — solo, no external hand-off.

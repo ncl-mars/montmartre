@@ -1,9 +1,10 @@
 # PATINA / "lichens" — Project Instructions
 
 PATINA is a **speculative, unpaid studio R&D piece** — art-direction + tech research, no client. Use case:
-lichen/growth VFX on my own **Sony A7 II** footage (8-bit **S-Log2 / S-Gamut**) of my **Paris** surroundings —
-the first test surface is the **zinc/stone rooftop chimneys** outside my flat. RAW is stills only (good for
-**photogrammetry** of the chimney surfaces). The lichen element is a Houdini SCA sim (forked from BioGrowth);
+lichen/growth VFX on my own footage of my **Paris** surroundings — the first test surface is the
+**zinc/stone rooftop chimneys** outside my flat. Primary camera: **Sony A7R V** (10-bit **S-Log3 / S-Gamut3**,
+up to 8K, MP4) on a **DJI RS gimbal**; the older **A7 II** (8-bit S-Log2) is the legacy body. 61 MP RAW stills
+for **photogrammetry** of the chimney surfaces. The lichen element is a Houdini SCA sim (forked from BioGrowth);
 Nuke/Blink for comp, Karma for render, Resolve for finish. The plan is to build the spec piece first, then
 extract a generic growth-VFX template into `d:\FLAT\_studio` later. The tech is forked unchanged from the UTMB
 project (SCA/lichen sim, the OCL/VEX include library, the ACES pipeline, BioGrowth donor architecture).

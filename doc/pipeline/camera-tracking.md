@@ -4,10 +4,12 @@ Project context: a short spec piece of lichens grown in Houdini (BioGrowth SCA) 
 **digital** plates shot around **Paris rooftops** (zinc/stone chimneys outside the flat — strong texture
 and fine detail, good for the solve). The solved camera feeds the Houdini sim and the Nuke comp.
 
-> **Camera.** A **Sony A7 II** (full-frame, **35.8 × 23.9 mm** sensor, E-mount) with three **Zeiss primes
-> — 20 / 35 / 55 mm**. Video is **8-bit S-Log2 / S-Gamut** (no internal RAW video); **RAW is stills only**,
-> used for chimney photogrammetry. A bit old but a perfectly capable setup, and the primes are what matter.
-> The sensor size is a **known spec** read from metadata.
+> **Camera.** Primary: a **Sony A7R V** (full-frame, 61 MP, E-mount) on a **DJI RS gimbal** — video
+> **10-bit S-Log3 / S-Gamut3**, up to **8K**, MP4; **61 MP RAW stills** for chimney photogrammetry. The gimbal
+> gives **controlled, repeatable moves** — deliberate sideways arcs for strong **parallax** (a tight solve
+> needs *translation*, not just rotation — the lesson from the early handheld grabs). Legacy body: **Sony A7 II**
+> (8-bit S-Log2, 35.8 × 23.9 mm) + Zeiss primes 20/35/55 — older clips (e.g. SH010/C0028) were shot on it.
+> Sensor size is a **known spec** read from metadata.
 
 > **What the track needs.** Footage carries **embedded metadata** (focal length, sensor, shutter, ISO,
 > frame rate) and a known sensor, so the camera intrinsics are read, not reconstructed. The work is:

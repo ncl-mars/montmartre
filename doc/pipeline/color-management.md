@@ -53,19 +53,42 @@ Resolve**, guaranteeing identical color across applications, artists, and episod
 
 - Official **ACES OCIO config** (v2.x for ACES 2.0 — §5).
 - **Version-pinned**: the exact config is committed; no application uses its built-in default.
+- **Committed file, not the app bundle**: point every app at the committed `config/ocio/*.ocio` (Nuke:
+  *custom OCIO config* field or `$OCIO`), **not** an application's bundled config (e.g. Nuke's
+  `fn-nuke_studio-config…`). The bundle is the *same ACES math* but is versioned with the **app install** →
+  it drifts across collaborators / machines / app versions. The committed file is the single source of truth
+  (verified equivalent: same roles — `scene_linear`, `compositing_log`, `matte_paint`, `texture_paint` — and
+  the same ACES 2.0 views).
 - **Studio template**: forked per project; the per-project copy is canonical for that show.
 
 ---
 
 ## 4. Digital plate input transform
 
-Digital cameras have **standard ACES IDTs**, so plate input is straightforward. To bring plates into ACEScg:
+Plates reach ACEScg by one of two routes depending on how the take was recorded. The **A7R V is captured
+dual-stream** (Atomos Ninja V+ on the DJI RS accessory handle, off-axis — out of the gimbal balance):
+**ProRes RAW 12-bit is the default master**; **XAVC S-I 4K** (10-bit 4:2:2 S-Log3, All-Intra) records
+internally **simultaneously** as the safety leg. Same take, two formats, two color entry points — one shared
+ACEScg working space downstream.
 
-- Identify the **camera body + recording color space** actually shot. Here: **Sony A7 II, 8-bit S-Log2 /
-  S-Gamut** video — use the matching **Sony S-Log2 / S-Gamut ACES IDT** (see
-  [camera-tracking.md](camera-tracking.md)). RAW stills (photogrammetry) carry their own profile.
-- Assign the matching **vendor ACES IDT** → ACEScg. If a shot is captured outside a supported log/raw
-  profile, characterize and build an input transform for it.
+| Source (per take) | Role | Color entry → ACEScg | Needs Resolve? |
+|---|---|---|---|
+| **ProRes RAW** (A7R V, 16-bit RAW over HDMI) | **default hero master** | **Resolve Studio** RAW develop (debayer + ISO/WB/exposure + color transform) → **ACEScg EXR** | yes — RAW develop |
+| **XAVC S-I 4K** (A7R V internal, S-Log3/S-Gamut3) | simultaneous safety / instant edit | **stock ACES `Sony S-Log3 S-Gamut3` IDT** (in the OCIO config) | no — IDT direct |
+| **A7 II** (legacy, 8-bit S-Log2/S-Gamut) | legacy shots only | **custom-built S-Log2/S-Gamut IDT** (see [camera-tracking.md](camera-tracking.md)) | no — IDT direct |
+| RAW stills (photogrammetry) | chimney surface | own profile (own decode) | — |
+
+- **RAW bypasses the S-Log3 IDT.** ProRes RAW is undebayered sensor data, *not* S-Log3 video — its color
+  entry is the **RAW develop** in Resolve (decode/debayer Bayer→RGB + WB/exposure + color transform), not the
+  OCIO IDT. The decode is the hard software constraint: Nuke/Houdini/Karma **cannot decode ProRes RAW** (on
+  Windows it isn't a supported Nuke host at all), so the RAW leg is **always** developed to **ACEScg
+  scene-linear EXR** in Resolve before it touches comp. Nuke reads finished ProRes (422/4444) but never the
+  RAW variant.
+- **The S-Log3 IDT stays the entry point for the XAVC S-I leg** — native to the existing pipeline, no Resolve
+  step. This is the escape hatch: if a shot doesn't warrant the RAW finish, or comp must start before the
+  Resolve conform exists, the S-I file runs straight through the IDT/OCIO path. It's also the frame-accurate
+  backup if the HDMI feed to the Ninja ever drops.
+- If a shot is captured outside a supported log/raw profile, characterize and build an input transform for it.
 - Plates enter at **Nuke comp**, not Houdini — Houdini renders CG passes only.
 
 ---
@@ -82,7 +105,45 @@ unchanged. It requires the ACES 2.0 Output Transforms and the matching **v2 OCIO
 
 ---
 
-## 6. Handoffs & ordering
+## 6. Monitoring vs delivery — and the Resolve OCIO performance trap
+
+**Two different transforms for two different jobs.** What you *view* through ≠ what you *render* through:
+- **Monitoring** (interactive viewer, ingest / grade): speed matters; a LUT approximation is acceptable.
+  Always **disabled before any scene-linear EXR export**.
+- **Delivery** (one-time batch render): apply the managed **ACES Output Transform (ODT)** analytically, at
+  full precision — **never** a viewer LUT. Render speed is irrelevant (it is not playback), so exactness wins.
+
+**Resolve 21.0 OCIO slowdown (known, ACES 2.0).** Viewing ACEScg through Resolve's **OCIO** color science /
+OCIO OFX with the `ACES 2.0 - SDR 100 nits (Rec.709)` view is pathologically slow in **Resolve 21.0** (was
+fine in 20.3). 21.0's bundled OCIO runs the ACES 2.0 analytic DRT **off the GPU** — observed CPU busy / GPU
+idle (CPU fallback), tracked upstream as OCIO #2116. *Not* a config or hardware fault: the same OCIO node is
+fast with a lightweight (non-ACES-2.0) view or a different config.
+
+**Fix — monitor with Resolve's native ACES Transform, not OCIO.** The ingest project runs **DaVinci YRGB
+Color Managed (RCM)** anyway, so use the native engine for the viewer:
+
+| ACES Transform (OFX) | Setting |
+|---|---|
+| ACES Version | `ACES 2.0` |
+| Input Transform | `ACEScg - CSC` |
+| Output Transform | **`sRGB Piecewise`** (*not* `sRGB Gamma 2.2`) |
+| Gamut Compress | `None` |
+
+- **`sRGB Piecewise`, not `Gamma 2.2`:** the OCIO `sRGB - Display` uses the piecewise sRGB EOTF; pure 2.2
+  differs in the shadows. `Gamut Compress = None` matches the OCIO view (that control is the optional *input*
+  gamut compress, which the view does not apply).
+- Native = Blackmagic's GPU-optimized implementation → fast, and matches the `$OCIO` config to within
+  monitoring tolerance. **Monitoring only — disable before exporting the ACEScg EXR.**
+
+**Exact-match QC LUT (optional).** `config/ocio/ACEScct_to_ACES2-SDR-sRGB.cube` — a 65³ `ACEScct → ACES 2.0
+SDR Rec.709 (sRGB-piecewise)` LUT baked from the committed config via PyOpenColorIO (validated to 2.6e-4).
+Kept as ground truth: A/B native vs a `CST(ACEScg→ACEScct) → LUT` node pair in the shadows to *prove*
+native == OCIO. Apply only via that CST→LUT pair — the LUT expects an **ACEScct** signal; never index it in
+linear (a linear-input bake starves the shadows). Never used at delivery.
+
+---
+
+## 7. Handoffs & ordering
 
 - **Houdini → Nuke:** linear **ACEScg EXR** (AOVs preserved).
 - **Grain / film-emulation:** performed in **Nuke, in linear**, before the Resolve grade, so CG and plate
@@ -95,11 +156,14 @@ unchanged. It requires the ACES 2.0 Output Transforms and the matching **v2 OCIO
 
 ---
 
-## 7. Decisions to lock
+## 8. Decisions to lock
 
 - [x] ACES version: **2.0** (locked)
 - [ ] Houdini / Nuke / Resolve on versions supporting ACES 2.0 output transforms + v2 OCIO config
-- [ ] Exact OCIO config version, committed + `$OCIO` set on all stations/apps
+- [ ] Exact OCIO config version, committed + `$OCIO` set on all stations/apps (committed file, not app bundle — §3)
+- [x] Resolve monitoring = native **ACES Transform** (`sRGB Piecewise`), not the OCIO OFX (21.0 perf — §6)
 - [ ] Camera IDT confirmed for the body + recording format actually shot
+- [ ] A7R V dual-capture confirmed on the kit: ProRes RAW (Ninja V+) + simultaneous XAVC S-I internal; RAW
+      conform target = **ACEScg EXR** out of Resolve (4444 only as a Nuke-native fallback)
 - [ ] Delivery output transform(s) confirmed (Rec.709 / P3 / resolution)
 - [ ] Nuke→Resolve handoff format (ACES EXR finals; proxy codec for offline)

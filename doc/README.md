@@ -1,7 +1,7 @@
 # PATINA / "lichens" — Documentation
 
 Documentation for **PATINA** — a speculative, unpaid studio R&D piece: lichen/growth VFX composited onto
-my own digital footage (Sony A7 II, S-Log2/S-Gamut) of **Paris rooftop surfaces** — first test surface the
+my own digital footage (Sony A7R V — 10-bit S-Log3/S-Gamut3, on a DJI RS gimbal; A7 II/S-Log2 legacy) of **Paris rooftop surfaces** — first test surface the
 **zinc/stone chimneys** outside my flat — rendered in Karma. **Lichen is the current hero element** (a Houdini
 sim derived from an imported BioGrowth base); other growth elements will follow and get their own areas. The
 `pipeline/` and `reference/` docs apply project-wide; `lichen/` and `tech/` are element/tech-specific.
