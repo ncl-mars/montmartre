@@ -86,8 +86,18 @@ noisy high-ISO shot (keep the original for the comp).
    - **Solve error** in pixels: `< 1.0` usable, `< 0.5` good, `< 0.3` excellent.
    - Inspect per-track error; **reject high-error and short-lived tracks**, then **re-solve**.
    - Scrub the **3D point cloud** — points should sit stably on the surfaces, not swim or balloon.
-6. **Orient & scale the scene:** define the **ground plane**, set the **origin**, and set **scale** from
-   a known measurement. Without this the camera is unitless and the growth sim won't sit at real scale.
+6. **Orient & scale the scene (CameraTracker coordinate tools).** Select solved tracks in the Viewer,
+   right-click:
+   - **Set Ground Plane → Selected** — lasso several **cobble tracks** (more = flatter; lays them on Y=0).
+   - **Set Origin → Selected** — one ground track becomes world zero.
+   - **Set Distance** — select **exactly two** tracks, type a **real measurement** (convention: 1 unit = 1 m).
+     No `solve_dist` math needed — RC computes the scale factor.
+
+   A monocular solve is **scale-free** — you *must* inject one real distance, and **on-site tape beats any
+   standard**. Pick two **sharp, far-apart, tracked** features (window-frame corners), never soft plaster or
+   shutters. **Scale refs (Montmartre village ≠ Haussmann — don't trust floor heights):** pavés ~**14 cm**,
+   doors ~**2 m**, garde-corps ~**1 m**. Without scale the camera is unitless and the sim won't sit at real
+   scale. Re-run **Create Camera / Point Cloud / Scene** after setting coords so outputs bake the new space.
 7. **Create** Camera, PointCloud, and Scene from the solve.
 
 ---
@@ -116,6 +126,19 @@ noisy high-ISO shot (keep the original for the comp).
 - **Scale note:** thin-filament radii hit Murray/allometric underflow at sub-mm scale. The sim scene is
   scaled up for the solve and back down after (no kernel changes). See `doc/lichen/todo.md`.
 
+**Aligning the RC scan to the solved camera.** Two independent solves start in different space + scale:
+- **Scale-match first** — the RC mesh (real-scaled from one on-site measurement) is the ruler; then fix
+  **axis / handedness** (RC up-axis ≠ Nuke Y-up), then rotate/translate to seat the point cloud on the mesh.
+  Scale + orient the **parent** of the camera + cloud together (or use the CameraTracker coordinate tools, §3).
+- **Validate by projection** — project the plate through the solved camera onto the mesh: the texture must
+  **stick** across the *whole* move (parallax reveals depth errors a single frame hides). Sliding = scale,
+  lens, or alignment error. Align in **undistorted** space with matching focal/aperture.
+- **Low parallax** (mostly dolly + roll, little lateral move) is the hard case — don't grind Nuke; feed the
+  **mesh as survey geometry to constrain the solve** (SynthEyes/3DE, §6). A small lateral arc on the next
+  shoot beats a lot of dolly+roll.
+- **Blender matchmove:** use the **undistorted** plate as background (the solved camera is pinhole) — redistort
+  the CG in the Nuke comp (§4).
+
 ---
 
 ## 6. Escalation to SynthEyes / 3DE
@@ -133,6 +156,30 @@ then export the camera to Nuke/Houdini. The comp + sim pipeline downstream is id
 moves out of Nuke.
 
 ---
+
+## 7. Photogrammetry image prep (RealityCapture)
+
+**Two input sources** feed RC, sometimes together on the same chimney:
+- **Extracted video frames** — the default solo workflow (now): frames pulled from the S-Log3 footage.
+  Lower res, watch motion blur / rolling shutter — pick sharp frames.
+- **Dedicated on-site still shoot** — 61 MP RAW stills (planned, when not shooting alone). Higher quality.
+- **Both combined** — RC happily mixes resolutions/sources, but they **must share the same color/exposure**
+  so alignment and texturing stay consistent → run *every* source through the **same** transform below.
+
+All inputs must be **8-bit sRGB, display-referred, full-range, no clipping** — RC matches features by
+texture, so blown highlights / crushed shadows = lost geometry. Exported from Resolve (Deliver):
+
+- **Format:** JPEG 8-bit, Quality **Best**; Force sizing + debayer to highest quality.
+- **Color:** bake the `ACEScg → sRGB piecewise` transform (the ACES rolloff protects highlights — see
+  [color-management.md](color-management.md) §6). Apply it as a node on **all** clips, then leave Deliver
+  **Output Color Space / Gamma = "Same as Timeline"** (identity passthrough — do *not* also set Output to
+  sRGB, that double-converts). Tag the file **Color Space = Rec.709, Gamma = sRGB**.
+- **Data Levels = Full** (NOT Auto/Video — video levels crush to 16–235 and ruin the images). *Only matters
+  for integer formats; the scene-linear EXR plate stays Auto/Full, no-op for float.*
+- **Verify:** render one frame, compare to the Color viewer — must match. If highlights clip, pull exposure.
+
+The reconstructed surface (point cloud / mesh) lands in solved-camera space to drive the sim's `surface`
+VDB constraint (§ intro, §5).
 
 ## Checklist
 

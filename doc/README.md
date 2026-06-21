@@ -39,3 +39,4 @@ Static, reusable reference for the tools. Canonical.
 - [nuke-dev.md](reference/nuke-dev.md) — Nuke development notes
 - [blinkscript-specs.md](reference/blinkscript-specs.md) — BlinkScript language spec + gotchas
 - [resources.md](reference/resources.md) — capture/technique reference (HDRI capture, …)
+- [realitycapture.md](reference/realitycapture.md) — RealityCapture photogrammetry: quality settings, Alembic export, gotchas

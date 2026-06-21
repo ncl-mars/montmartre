@@ -64,6 +64,7 @@ footage/
 
 # ── Photogrammetry working metadata (RealityScan/Capture — regenerable, not interchange) ──
 rsmeta.db
+*.rsInfo
 
 # ── DCC app working dirs (heavy) ──
 blend/
@@ -138,6 +139,7 @@ nuke/comp/
 *.usdz
 *.fbx
 *.obj
+*.mtl
 *.ply
 *.stl
 *.sim
