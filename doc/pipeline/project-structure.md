@@ -40,11 +40,14 @@ studio-template/      the canonical seed (its own repo/folder)
 │   └──────────────────────────────────────────────────────────────────────┘
 │
 │   ┌─ production content (ENTITY based) ─────────────────────────────────────┐
-├── elements/                     reusable elements / assets
+├── elements/                     reusable element systems (sim + modeling + lookdev) — NOT the assets/ library
 │   └── <element>/                an element (may fork a studio techno)
 │       ├── hou/                  Houdini system — <element>_v###.hip + cache
 │       ├── blender/              3D modeling + lookdev
 │       └── ref/  tex/            element reference / textures
+│
+├── assets/                       reusable CG library (heavy, gitignored) — models, textures, HDRIs, scans
+│   └── scan/<location>/          photogrammetry reconstructions (RealityScan) — clean mesh + tex, per location
 │
 ├── shots/                        (episode →) (sequence →) shot
 │   └── <EP>/<SH>/                e.g. EP01/SH010
@@ -107,6 +110,10 @@ shots/<EP>/<SH>/render/   (comp EXRs, ACES)
 ## Conventions
 
 - **Elements:** `elements/<name>/{hou, blender, ref, tex}` — entity-first; apps live inside the element.
+- **Assets vs elements:** `assets/` = reusable **CG library** (models, textures, HDRIs, **location scans**) —
+  heavy, gitignored, on storage; distinct from `elements/` (authored systems). A photogrammetry **location
+  scan** lives in `assets/scan/<location>/`, reused by the few shots set there. RealityScan project + source
+  stills stay in the capturing shot's `prep/photogram/`; only the clean output mesh goes to `assets/scan/`.
 - **Shots:** `EP##/SH###`, numbered in tens (`SH010, SH020…`) for inserts; `EP02/…` scales a series.
   Optional `SEQ###` level if shots cluster into sequences. Copy `shots/_template/` to start a shot.
 - **DCC saves:** incremental (`<name>_v001.hip, v002…`).
