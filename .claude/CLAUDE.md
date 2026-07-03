@@ -1,15 +1,18 @@
-# PATINA / "lichens" — Project Instructions
+# MONTMARTRE — Project Instructions
 
-PATINA is a **speculative, unpaid studio R&D piece** — art-direction + tech research, no client. Use case:
-lichen/growth VFX on my own footage of my **Paris** surroundings — the first test surface is the
-**zinc/stone rooftop chimneys** outside my flat. Primary camera: **Sony A7R V** (10-bit **S-Log3 / S-Gamut3**,
-up to 8K, MP4) on a **DJI RS gimbal**; the older **A7 II** (8-bit S-Log2) is the legacy body. 61 MP RAW stills
-for **photogrammetry** of the chimney surfaces. The lichen element is a Houdini SCA sim (forked from BioGrowth);
-Nuke/Blink for comp, Karma for render, Resolve for finish. The plan is to build the spec piece first, then
-extract a generic growth-VFX template into `d:\FLAT\_studio` later. The tech is forked unchanged from the UTMB
-project (SCA/lichen sim, the OCL/VEX include library, the ACES pipeline, BioGrowth donor architecture).
-Generic Houdini VEX & OpenCL rules live in the global `~/.claude/CLAUDE.md`; this file adds PATINA-specific
-conventions. When the two conflict, this file wins.
+MONTMARTRE is a **speculative, unpaid studio R&D program** — art-direction + tech research, no client. It is
+**place-anchored**: all footage is shot in **Montmartre (Paris)**, next door, so plates / HDRIs / photogrammetry
+are cheap and re-shootable — an ideal proving ground for pipeline dev (go shoot, come back, iterate). The program
+is bounded to **4 episodes = 4 seasons** (one year of the hill); each episode is a self-contained piece
+exercising some tech, and the reusable tech + pipeline **promotes to `d:\FLAT\_studio`** as it proves out —
+Montmartre stays as the standing R&D program. **Episode 1 (summer)** is lichen/growth VFX — the first test
+surface is the **zinc/stone rooftop chimneys** outside my flat. Primary camera: **Sony A7R V** (10-bit
+**S-Log3 / S-Gamut3**, up to 8K, MP4) on a **DJI RS gimbal**; the older **A7 II** (8-bit S-Log2) is the legacy
+body. 61 MP RAW stills for **photogrammetry** of the chimney surfaces. The lichen element is a Houdini SCA sim
+(forked from BioGrowth); Nuke/Blink for comp, Karma for render, Resolve for finish. The tech is forked unchanged
+from the UTMB project (SCA/lichen sim, the OCL/VEX include library, the ACES pipeline, BioGrowth donor
+architecture). Generic Houdini VEX & OpenCL rules live in the global `~/.claude/CLAUDE.md`; this file adds
+MONTMARTRE-specific conventions. When the two conflict, this file wins.
 
 ## Ground rules
 - **Do not run destructive or filesystem-changing commands** (delete/move/create files, scaffold folders,

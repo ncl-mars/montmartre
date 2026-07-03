@@ -1,7 +1,7 @@
 # Camera Tracking in Nuke — Workflow & Reference
 
-Project context: a short spec piece of lichens grown in Houdini (BioGrowth SCA) and composited onto
-**digital** plates shot around **Paris rooftops** (zinc/stone chimneys outside the flat — strong texture
+Project context: **MONTMARTRE Episode 1 (summer)** — lichens grown in Houdini (BioGrowth SCA) and composited
+onto **digital** plates shot on **Montmartre rooftops** (zinc/stone chimneys outside the flat — strong texture
 and fine detail, good for the solve). The solved camera feeds the Houdini sim and the Nuke comp.
 
 > **Camera.** Primary: a **Sony A7R V** (full-frame, 61 MP, E-mount) on a **DJI RS gimbal** — video

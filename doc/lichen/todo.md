@@ -1,6 +1,6 @@
 # Japanese Lichen System — Build Plan / TODO
 
-The dedicated Japanese lichen simulation system — the hero element of the PATINA spec piece. Lives in
+The dedicated Japanese lichen simulation system — the hero element of **Episode 1 (summer)**. Lives in
 `hou/lichens.hiplc`. The BioGrowth code (`d:/SPEC/BioGrowth/`) is **imported as donor material and
 transformed into the lichen system** — a clean break: no upstream relationship, no merge-back. BioGrowth
 is not maintained alongside; the lichen system is canonical.
@@ -88,5 +88,5 @@ primary goal, and the shared grid makes cross-species queries cheap.)
 
 - Crustose / foliose / moss looks (different primitive — reaction-diffusion / instanced fuzz, not SCA).
 - Mechanical sway/wind animation (downstream deformer, post-growth — see two-era model in the plan doc).
-- A reusable/general tool **yet** — PATINA builds the lichen system bespoke for the spec piece first; the
-  generic growth-VFX template is extracted into `d:\FLAT\_studio` **later**, not now.
+- A reusable/general tool **yet** — MONTMARTRE builds the lichen system bespoke for Episode 1 first; the
+  generic growth-VFX tooling promotes to `d:\FLAT\_studio` once it proves out — **later**, not now.

@@ -1,4 +1,4 @@
-# PATINA monitoring LUT (3D, ACEScct domain) -> ACES 2.0 SDR 100nit (Rec.709)/sRGB-Display
+# MONTMARTRE monitoring LUT (3D, ACEScct domain) -> ACES 2.0 SDR 100nit (Rec.709)/sRGB-Display
 # baked from studio-config-v3.0.0_aces-v2.0_ocio-v2.4 via OCIO 2.5.2
 # USAGE: precede with a CST node ACEScg(lin) -> ACEScct, THEN this LUT. Monitoring only.
 LUT_3D_SIZE 65

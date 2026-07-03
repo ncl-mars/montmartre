@@ -1,6 +1,6 @@
 # Delivery & Mastering Spec — Spec Piece (web / showreel)
 
-Output specification for **PATINA**, a self-published spec/R&D piece. No client, no installation — the
+Output specification for **MONTMARTRE**, a self-published spec/R&D program. No client, no installation — the
 deliverables are a **web / showreel master** (portfolio, Vimeo/YouTube, festival/portfolio submissions)
 plus an **archival master**. Mastered from the in-house **DaVinci Resolve** grade, downstream of
 [color-management.md](color-management.md) (ACES/OCIO); grading happens in **ACEScct (log)**.
@@ -66,7 +66,7 @@ plus an **archival master**. Mastered from the in-house **DaVinci Resolve** grad
 
 ### Deliver page
 - Master resolution; master fps; ProRes for the web master / EXR for archive; Rec.709 tag; loop-ready if it
-  loops. Consistent naming/versioning (`patina_showreel_version`).
+  loops. Consistent naming/versioning (`montmartre_showreel_version`).
 
 ---
 

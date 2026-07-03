@@ -2,7 +2,7 @@
 
 The generic, reusable layout every project forks from. Two layers cohabit in one repo: the **studio
 template** (generic tooling) and the **production content** (entity-based). A concrete filled-in example
-is [patina-structure.md](patina-structure.md).
+is [montmartre-structure.md](montmartre-structure.md).
 
 ## Studio template → project (template-fork)
 

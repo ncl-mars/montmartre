@@ -1,6 +1,6 @@
 # RealityCapture — Photogrammetry Reference
 
-Reconstructing Paris rooftop/street surfaces (colonized chimney/wall geometry) from images, to drive the
+Reconstructing Montmartre rooftop/street surfaces (colonized chimney/wall geometry) from images, to drive the
 lichen sim's `surface` VDB constraint in solved-camera space. Inputs: **extracted S-Log3 video frames**
 (solo default) + **dedicated 61 MP RAW stills** (planned) — RC mixes both, as long as color is consistent.
 

@@ -1,13 +1,14 @@
-# PATINA — Project Structure (instance)
+# MONTMARTRE — Project Structure (instance)
 
 The concrete **instance** of the studio template. For the generic pattern, the two-layer model, and the
-template-fork mechanism, see [project-structure.md](project-structure.md). This document shows PATINA's
-actual content and its customizations.
+template-fork mechanism, see [project-structure.md](project-structure.md). This document shows MONTMARTRE's
+actual content and its customizations. MONTMARTRE is bounded to **4 episodes = 4 seasons** of the hill
+(`EP01`–`EP04`); **EP01 = summer**, the lichen element.
 
 ## Structure
 
 ```
-PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX elements ──
+MONTMARTRE/   ── speculative growth-VFX R&D — Montmartre (Paris) plates, seasonal episodes ──
 │
 │   ┌─ inherited from the studio template (tooling) ─────────────────────────┐
 ├── hou/scripts/{ocl, vex}        Houdini OpenCL / VEX libraries
@@ -16,14 +17,14 @@ PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX ele
 ├── doc/tech/biogrowth/           BioGrowth studio techno (lichen forked from it)
 │   └──────────────────────────────────────────────────────────────────────┘
 │
-│   ┌─ PATINA production content ──────────────────────────────────────────────┐
+│   ┌─ MONTMARTRE production content ──────────────────────────────────────────┐
 ├── elements/
 │   └── lichen/                   hero element — multi-species fruticose lichen (fork of BioGrowth)
 │       ├── hou/                  multi-species SCA sim — lichen_v###.hip + cache
 │       ├── blender/              mood / look-intent in Cycles (ref for Houdini MaterialX) + ref modeling
 │       └── ref/  tex/            species reference (Usnea / Cladonia), textures
 │
-├── shots/                        EP## / SH### — Paris rooftop plates (A7R V S-Log3; A7 II S-Log2 legacy)
+├── shots/                        EP## / SH### — Montmartre rooftop plates (A7R V S-Log3; A7 II S-Log2 legacy)
 │   └── EP01/SH010/
 │       ├── plate/  ref/          camera-original footage, HDRIs, photogrammetry (chimney stills), lens grid
 │       ├── track/  cam/          Nuke track → solved camera (.abc/.usd) + STMap
@@ -49,11 +50,11 @@ PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX ele
 └── .claude/   .gitignore
 ```
 
-## What PATINA fills in / customizes
+## What MONTMARTRE fills in / customizes
 
-- **Element:** the lichen element — a fork of the BioGrowth studio techno → `elements/lichen/`.
+- **Element (Episode 1, summer):** the lichen element — a fork of the BioGrowth studio techno → `elements/lichen/`.
   3–5 species, inter-species interaction, massive coverage. See [../lichen/todo.md](../lichen/todo.md).
-- **Plates:** digital capture, **Paris rooftops** — urban zinc/stone surfaces, hero subject the chimneys
+- **Plates:** digital capture, **Montmartre rooftops** — urban zinc/stone surfaces, hero subject the chimneys
   outside the flat (strong texture/detail for the solve and for photogrammetry). Primary camera: **Sony A7R V**
   (10-bit S-Log3 / S-Gamut3, up to 8K, MP4) on a **DJI RS gimbal**; **A7 II** (8-bit S-Log2) legacy. 61 MP RAW
   stills for chimney photogrammetry. See [camera-tracking.md](camera-tracking.md), [film-emulation.md](film-emulation.md).
@@ -62,4 +63,5 @@ PATINA/   ── speculative growth-VFX R&D — Paris rooftop plates, CG/VFX ele
 - **Finishing:** in-house **edit + cut + grade** (Resolve, ACEScct) — solo, no external hand-off.
 - **Delivery:** web / showreel master + archive master. See [delivery-spec.md](delivery-spec.md).
 - **Colour:** ACES via a shared OCIO config. See [color-management.md](color-management.md).
-- **Later:** extract the generic growth-VFX tooling back into a studio template (`d:\FLAT\_studio`).
+- **Promotion:** the reusable tech + pipeline promotes to the studio template (`d:\FLAT\_studio`) as it proves
+  out across episodes — Montmartre stays the standing R&D program.
