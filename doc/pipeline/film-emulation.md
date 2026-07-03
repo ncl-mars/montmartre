@@ -1,6 +1,6 @@
 # Film Emulation — Filmic Look on Digital Footage + CG
 
-MONTMARTRE is shot **digital**, but the target look is **filmic**. So the Karma lichen renders *and* the digital
+montmartre is shot **digital**, but the target look is **filmic**. So the Karma lichen renders *and* the digital
 plate both get a film emulation applied — the CG reads as *incrusté* (genuinely part of the image) rather
 than pasted on top, and the whole frame reads as film rather than clean digital. Companion to
 [camera-tracking.md](camera-tracking.md). BlinkScript implementation follows

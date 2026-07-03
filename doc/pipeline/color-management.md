@@ -152,7 +152,7 @@ linear (a linear-input bake starves the shadows). Never used at delivery.
 - **Nuke → Resolve:** final comps as **ACES EXR** (ACEScg or ACES2065-1) for conform; a log/ProRes proxy
   for offline editorial. Resolve grades in **ACEScct** on the ACES timeline.
 - **Resolve → delivery:** ACES Output Transform to the deliverable spec (Rec.709 web master / archive).
-- **MONTMARTRE:** solo finishing — in-house **edit + cut + grade** (Resolve, ACEScct), no external hand-off.
+- **montmartre:** solo finishing — in-house **edit + cut + grade** (Resolve, ACEScct), no external hand-off.
 
 ---
 

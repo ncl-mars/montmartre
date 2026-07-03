@@ -1,7 +1,7 @@
-# MONTMARTRE — Documentation
+# montmartre — Documentation
 
-Documentation for **MONTMARTRE** — a speculative, unpaid studio R&D program, **place-anchored in Montmartre
-(Paris)**: all footage is shot next door (Sony A7R V — 10-bit S-Log3/S-Gamut3, on a DJI RS gimbal; A7 II/S-Log2
+Documentation for **montmartre** — a speculative, unpaid studio R&D program, **place-anchored in montmartre
+(Paris)**: all footage is shot next door (Sony A7R V — 12-bit ProRes RAW via Atomos Ninja V+, on a DJI RS gimbal; A7 II/S-Log2
 legacy), so plates are cheap and re-shootable — an ideal pipeline-dev proving ground. Bounded to **4 episodes =
 4 seasons** of the hill; the reusable tech + pipeline promotes to `_studio` as it proves out.
 **Episode 1 (summer)** is lichen/growth VFX on the **zinc/stone rooftop chimneys** outside my flat, rendered in
@@ -27,12 +27,12 @@ The GPU/OpenCL SCA solver and its biological rules; the base the lichen element 
 ## [pipeline/](pipeline/) — production workflow
 Project-specific workflow, shoot → delivery. Evolves per shot.
 - [project-structure.md](pipeline/project-structure.md) — canonical studio template layout + template-fork model
-- [montmartre-structure.md](pipeline/montmartre-structure.md) — the MONTMARTRE project instance (filled-in graph)
+- [montmartre-structure.md](pipeline/montmartre-structure.md) — the montmartre project instance (filled-in graph)
 - [camera-tracking.md](pipeline/camera-tracking.md) — matchmove of the digital plates + chimney photogrammetry
 - [film-emulation.md](pipeline/film-emulation.md) — filmic look on digital footage + CG (grain, halation, MTF…)
 - [lookdev-render.md](pipeline/lookdev-render.md) — shading in Houdini MaterialX → Karma XPU (Blender/Cycles = mood reference)
 - [color-management.md](pipeline/color-management.md) — ACES/OCIO across Houdini→Nuke→Resolve (shared config)
-- [delivery-spec.md](pipeline/delivery-spec.md) — delivery/mastering for MONTMARTRE: web/showreel; Resolve log grading
+- [delivery-spec.md](pipeline/delivery-spec.md) — delivery/mastering for montmartre: web/showreel; Resolve log grading
 - [production-tracking.md](pipeline/production-tracking.md) — Kitsu evaluation for FLAT (production tracking; deferred)
 
 ## [reference/](reference/) — tool & language facts

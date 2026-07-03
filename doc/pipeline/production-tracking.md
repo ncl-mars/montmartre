@@ -3,7 +3,7 @@
 **Status: DEFERRED — adopt later, not now.** This page captures the case for bringing a production tracker
 into FLAT, what to use, and how to roll it out when the time comes. No action is committed yet.
 
-Scope note: **MONTMARTRE is a solo spec/R&D program** — it does **not** need a tracker on its own. This is a
+Scope note: **montmartre is a solo spec/R&D program** — it does **not** need a tracker on its own. This is a
 **studio-level (FLAT) decision**, because **FLAT is a 3-person, multi-discipline studio** (Houdini/comp/pipeline
 + editorial/Resolve + Blender/Cycles, with grade sometimes external). At 3 people with real handoffs, a tracker
 starts to pay back.
@@ -80,7 +80,7 @@ Adopt on a concrete trigger, not speculatively:
 
 ## 6. Rollout plan (when we do it)
 
-1. **Pilot on a calm project** (MONTMARTRE or the next small job) — never first onboard during a deadline crunch.
+1. **Pilot on a calm project** (montmartre or the next small job) — never first onboard during a deadline crunch.
 2. **Model the real workflow**, not an idealised one: shots, the Houdini→Nuke→Resolve task chain, review
    playlists. See the starter shape in §7.
 3. **Use it for 2–3 weeks.** If the team actually keeps it updated, standardise; if not, stop — a stale tracker
@@ -94,7 +94,7 @@ Adopt on a concrete trigger, not speculatively:
 A first cut, to be refined during the pilot. Mirrors our [project-structure.md](project-structure.md) layout.
 
 ```
-Project (e.g. MONTMARTRE)
+Project (e.g. montmartre)
 ├── Assets
 │   └── lichen            (element / sim system)   tasks: sim, lookdev (Houdini MaterialX), modeling (Blender)
 ├── Sequences / Shots
@@ -136,7 +136,7 @@ Project (e.g. MONTMARTRE)
 ## 10. Open decisions / next steps (when revived)
 
 - [ ] SaaS vs self-host for the Phase-1 pilot (recommend SaaS first)
-- [ ] Which project hosts the pilot (MONTMARTRE vs next small job)
+- [ ] Which project hosts the pilot (montmartre vs next small job)
 - [ ] Final task-type / status list for the FLAT workflow (refine §7)
 - [ ] Who is the de-facto coordinator/admin (likely the lead)
 - [ ] Defer Ayon decision until tracking is bedded in

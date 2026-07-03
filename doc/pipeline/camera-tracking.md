@@ -1,11 +1,12 @@
 # Camera Tracking in Nuke — Workflow & Reference
 
-Project context: **MONTMARTRE Episode 1 (summer)** — lichens grown in Houdini (BioGrowth SCA) and composited
-onto **digital** plates shot on **Montmartre rooftops** (zinc/stone chimneys outside the flat — strong texture
+Project context: **montmartre Episode 1 (summer)** — lichens grown in Houdini (BioGrowth SCA) and composited
+onto **digital** plates shot on **montmartre rooftops** (zinc/stone chimneys outside the flat — strong texture
 and fine detail, good for the solve). The solved camera feeds the Houdini sim and the Nuke comp.
 
-> **Camera.** Primary: a **Sony A7R V** (full-frame, 61 MP, E-mount) on a **DJI RS gimbal** — video
-> **10-bit S-Log3 / S-Gamut3**, up to **8K**, MP4; **61 MP RAW stills** for chimney photogrammetry. The gimbal
+> **Camera.** Primary: a **Sony A7R V** (full-frame, 61 MP, E-mount) on a **DJI RS gimbal** — hero master
+> **12-bit ProRes RAW** (Atomos Ninja V+) + a simultaneous internal **XAVC S-I 4K** S-Log3 safety stream;
+> **61 MP RAW stills** for chimney photogrammetry. The gimbal
 > gives **controlled, repeatable moves** — deliberate sideways arcs for strong **parallax** (a tight solve
 > needs *translation*, not just rotation — the lesson from the early handheld grabs). Legacy body: **Sony A7 II**
 > (8-bit S-Log2, 35.8 × 23.9 mm) + Zeiss primes 20/35/55 — older clips (e.g. SH010/C0028) were shot on it.
@@ -51,25 +52,37 @@ measurement for scale. Everything else improves quality and integration.
 
 ## 2. Plate prep pipeline (before solving)
 
-Prep is light: conform to the working space, then lens undistort.
+Prep is light: develop / conform, an optional denoise on the **tracking branch**, then lens undistort — the
+comp returns onto the *original* plate.
 
 ```
-camera-original → conform / linearize → lens undistort → SOLVE
-                                              │
-                              (keep distortion model / STMap
-                               for the final comp)
+camera-original
+  │   develop / conform      (RAW → Resolve → ACEScg EXR;  XAVC / A7 II → IDT in Nuke)
+  ▼
+ACEScg plate
+  ├─►  [denoise]* ─►  undistort (calib.io grid → STMap) ─►  SOLVE ─►  camera + point cloud
+  │
+  └─►  ORIGINAL (distorted) plate ─────────►  COMP  ◄─  CG
+         (CG rendered in undistorted space, redistorted onto the plate via the kept STMap)
+
+* denoise only when needed — high-ISO or the legacy A7 II (8-bit); the 12-bit ProRes RAW hero usually
+  tracks as-is.
 ```
 
-1. **Conform / linearize.** Bring the camera-original (log or raw) into the working color space via the
-   correct IDT (see [color-management.md](color-management.md)). Confirm fps and that no retime is applied.
-2. **Watch rolling shutter.** CMOS sensors skew fast pans / vibration. Whip pans or rig vibration may need
+1. **Develop / conform.** The **ProRes RAW** hero can't be read by Nuke — it's **developed in Resolve →
+   ACEScg EXR** first (that EXR becomes the tracking plate). The **XAVC S-I 4K** safety leg conforms via the
+   stock **S-Log3 IDT** in Nuke; legacy **A7 II** via its custom S-Log2 IDT. See
+   [color-management.md](color-management.md). Confirm fps and that no retime is applied.
+2. **Denoise — only if needed, on the tracking copy.** Run it **before** undistort: the undistort warp
+   resamples and *correlates* noise (worst at the edges), so clean it while the grain is still uniform
+   sensor-space. The 12-bit RAW hero usually tracks as-is — reserve denoise for high-ISO or the 8-bit A7 II.
+   Keep the **original** (un-denoised) plate for the comp.
+3. **Watch rolling shutter.** CMOS sensors skew fast pans / vibration. Whip pans or rig vibration may need
    a rolling-shutter correction before the solve (or escalation, §6).
-3. **Undistort** with `LensDistortion` (feed the lens grid). Output an **STMap** for redistorting the
-   rendered CG back to match the plate at the end.
-4. Solve on the **undistorted** plate.
-
-A well-exposed plate tracks as-is; a light denoise on the *tracking* copy is only worth it on an unusually
-noisy high-ISO shot (keep the original for the comp).
+4. **Undistort** with `LensDistortion` (feed the calib.io grid). Output an **STMap** for redistorting the
+   rendered CG back onto the plate at the end.
+5. **Solve** on the **undistorted** plate. The comp later returns onto the **original** (still-distorted)
+   plate, with CG redistorted via the kept STMap (§4–5).
 
 ---
 
@@ -95,7 +108,7 @@ noisy high-ISO shot (keep the original for the comp).
 
    A monocular solve is **scale-free** — you *must* inject one real distance, and **on-site tape beats any
    standard**. Pick two **sharp, far-apart, tracked** features (window-frame corners), never soft plaster or
-   shutters. **Scale refs (Montmartre village ≠ Haussmann — don't trust floor heights):** pavés ~**14 cm**,
+   shutters. **Scale refs (montmartre village ≠ Haussmann — don't trust floor heights):** pavés ~**14 cm**,
    doors ~**2 m**, garde-corps ~**1 m**. Without scale the camera is unitless and the sim won't sit at real
    scale. Re-run **Create Camera / Point Cloud / Scene** after setting coords so outputs bake the new space.
 7. **Create** Camera, PointCloud, and Scene from the solve.
@@ -111,6 +124,35 @@ noisy high-ISO shot (keep the original for the comp).
   it marries the original (still-distorted) plate.
 - Without a grid, `LensDistortion` / CameraTracker can *estimate* distortion from footage, but a shot grid
   is more reliable. Wide primes (the 20mm) carry the most distortion, so prioritise their grids.
+
+### Shooting the grid (calib.io checker)
+
+The grid is a large **calib.io checkerboard** (rigid, flat backing). Shooting it well is the whole game:
+
+**Make-or-break**
+- **In-camera lens correction OFF** — Menu → Lens Comp → **Distortion Comp = OFF** (shading / CA off too).
+  You're calibrating the *true* optical distortion; if the body pre-corrects it, the STMap fights the plate.
+  RAW stills ignore it, but video can bake it — verify.
+- **Shoot the grid in the same recording mode as the hero plates** — same sensor crop / readout, not just the
+  same lens. The ProRes RAW HDMI readout can differ in coverage from the internal 8K / XAVC; distortion is
+  tied to the active sensor area, so a mismatched mode won't line up. Codec is irrelevant (geometry is
+  codec-agnostic) — the **crop / format** is what must match.
+- **Fill the frame — push the checker into all four corners.** Distortion lives at the edges; no board in the
+  corners = nothing for `LensDistortion` to fit there. The big board lets you fill frame *and* keep working
+  distance.
+
+**Quality**
+- **Flat + frontoparallel** — board perpendicular to the lens axis, sensor plane parallel to it. Tilt =
+  perspective that pollutes the fit (tripod, level, centre it).
+- **Per prime, prioritise the 20mm** (most distortion). Ideally at a focus distance near the real shots
+  (focus breathing shifts distortion).
+- **Tack-sharp corners, no glare** — f/5.6–8, ISO 100, flat even light, no specular hotspot (blown squares
+  kill corner detection); tripod, no motion blur.
+- **A few reframes** nudging the board through centre + each corner beat a single frame.
+- **Per body** — A7 II legacy shots need their own grids (different sensor / format).
+
+`LensDistortion` → **Grid Detect / Analysis** on the checker → fits the model → STMap. The known square size
+isn't needed for Nuke's line-based fit (only for a *metric* calibration in OpenCV / 3DE).
 
 ---
 
@@ -160,8 +202,9 @@ moves out of Nuke.
 ## 7. Photogrammetry image prep (RealityCapture)
 
 **Two input sources** feed RC, sometimes together on the same chimney:
-- **Extracted video frames** — the default solo workflow (now): frames pulled from the S-Log3 footage.
-  Lower res, watch motion blur / rolling shutter — pick sharp frames.
+- **Extracted video frames** — the default solo workflow (now): frames pulled from the **developed ProRes RAW**
+  hero footage (or the **XAVC S-I 4K** S-Log3 safety stream), exported from Resolve. Lower res than stills,
+  watch motion blur / rolling shutter — pick sharp frames.
 - **Dedicated on-site still shoot** — 61 MP RAW stills (planned, when not shooting alone). Higher quality.
 - **Both combined** — RC happily mixes resolutions/sources, but they **must share the same color/exposure**
   so alignment and texturing stay consistent → run *every* source through the **same** transform below.
@@ -184,7 +227,7 @@ VDB constraint (§ intro, §5).
 ## Checklist
 
 - [ ] Camera/lens metadata verified (focal length, sensor size) — per body actually shot
-- [ ] Lens distortion grid shot per prime (20 / 35 / 55)
+- [ ] Lens distortion grid shot per prime (calib.io checker; in-camera distortion comp OFF; same recording mode as plates)
 - [ ] At least one real-world measurement for scale
 - [ ] Plate conformed → undistorted before solving
 - [ ] Rolling shutter checked on fast pans / vibration

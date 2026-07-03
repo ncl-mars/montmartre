@@ -29,7 +29,7 @@ File knobs evaluate **TCL**, not shell. No bare `$VAR` — wrap in `[getenv VAR]
 - Backslashes break TCL — never paste Windows `\` paths.
 - TCL evals at knob-read; wrap dynamic bits, don't hardcode frames.
 
-## MONTMARTRE launch (env before Nuke starts; OCIO can't be set from init.py)
+## montmartre launch (env before Nuke starts; OCIO can't be set from init.py)
 ```bat
 set "JOB=D:/FLAT/SPEC/MONTMARTRE"
 set "OCIO=D:/FLAT/SPEC/MONTMARTRE/config/ocio/studio-config-v3.0.0_aces-v2.0_ocio-v2.4.ocio"

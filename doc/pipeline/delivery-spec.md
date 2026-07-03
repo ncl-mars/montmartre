@@ -1,6 +1,6 @@
 # Delivery & Mastering Spec — Spec Piece (web / showreel)
 
-Output specification for **MONTMARTRE**, a self-published spec/R&D program. No client, no installation — the
+Output specification for **montmartre**, a self-published spec/R&D program. No client, no installation — the
 deliverables are a **web / showreel master** (portfolio, Vimeo/YouTube, festival/portfolio submissions)
 plus an **archival master**. Mastered from the in-house **DaVinci Resolve** grade, downstream of
 [color-management.md](color-management.md) (ACES/OCIO); grading happens in **ACEScct (log)**.

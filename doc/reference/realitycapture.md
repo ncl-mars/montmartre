@@ -1,8 +1,9 @@
 # RealityCapture — Photogrammetry Reference
 
-Reconstructing Montmartre rooftop/street surfaces (colonized chimney/wall geometry) from images, to drive the
-lichen sim's `surface` VDB constraint in solved-camera space. Inputs: **extracted S-Log3 video frames**
-(solo default) + **dedicated 61 MP RAW stills** (planned) — RC mixes both, as long as color is consistent.
+Reconstructing montmartre rooftop/street surfaces (colonized chimney/wall geometry) from images, to drive the
+lichen sim's `surface` VDB constraint in solved-camera space. Inputs: **frames developed from the ProRes RAW
+hero footage** (solo default; the XAVC S-I 4K S-Log3 safety stream is the fallback) + **dedicated 61 MP RAW
+stills** (planned, premium) — RC mixes both, as long as color is consistent.
 
 ## Capture (for parallax)
 - Photogrammetry needs **translation / parallax** — *move around* the subject. A **pano** (fixed nodal point)
@@ -11,7 +12,8 @@ lichen sim's `surface` VDB constraint in solved-camera space. Inputs: **extracte
   than burst — or **rafale**. Either way: **fast shutter ≥ 1/500**, **manual exposure** (fixed/consistent),
   base ISO 100, **RAW**. Overlap 70–80%, many angles + height.
 - **Picture Profile / Creative Look do NOT affect RAW** (metadata + JPEG preview/histogram only) — develop RAW
-  to sRGB in post. (S-Log3 *does* bake into *video* frames, so the video-frame leg needs the IDT/transform.)
+  to sRGB in post. The **ProRes RAW** hero video is likewise developed (no baked curve); **S-Log3 only bakes
+  into the XAVC S-I safety video**, so *that* leg needs the develop/transform.
 
 ## Image input
 Export as **8-bit sRGB, full-range, no clipping**, every source through the *same* transform — see

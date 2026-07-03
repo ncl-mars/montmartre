@@ -1,6 +1,6 @@
 # VFX Pipeline — Plate → Track → Comp → Grade (pristine, end-to-end)
 
-The clean working process for a MONTMARTRE shot, ACES throughout. **Not theory — the actual steps**, built and
+The clean working process for a montmartre shot, ACES throughout. **Not theory — the actual steps**, built and
 verified on **EP01/SH010** (terracotta chimney pots, shot on the legacy **A7 II** — 8-bit S-Log2, 1080p, 25 fps).
 **Primary camera going forward: Sony A7R V** (10-bit S-Log3/S-Gamut3, on a DJI RS gimbal), captured
 **dual-stream** via an **Atomos Ninja V+** (on the RS accessory handle, off the gimbal balance): **ProRes RAW

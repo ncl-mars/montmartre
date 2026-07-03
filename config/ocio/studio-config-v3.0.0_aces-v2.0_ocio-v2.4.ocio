@@ -943,7 +943,7 @@ colorspaces:
     description: |
       Convert Sony S-Log2 S-Gamut to ACES2065-1
 
-      Legacy Sony A7-series IDT (NOT shipped in stock ACES 1.3/2.0 configs) — custom-built for MONTMARTRE.
+      Legacy Sony A7-series IDT (NOT shipped in stock ACES 1.3/2.0 configs) — custom-built for montmartre.
       S-Log2 OETF (Sony 2012 spec, legal-range code values) + S-Gamut->AP0 matrix
       (identical to the official S-Gamut3 matrix; S-Gamut and S-Gamut3 share primaries; CAT02).
       Verified vs Sony's published CV table: 18% gray CV347 -> 0.1795, 90% CV582 -> 0.8998.

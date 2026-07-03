@@ -80,7 +80,7 @@ Automate the bracketed sphere (rotate → fire brackets → advance), for repeat
 - **Syrp Genie** — motion-control crossover (also timelapse moves), flexible but not purpose-built.
 
 **Caveat — they solve precision, not moving light.** A full bracketed motorized sphere takes **minutes**;
-in fast-changing outdoor light (drifting cloud/sun, e.g. a Montmartre rooftop) the environment drifts *during* capture,
+in fast-changing outdoor light (drifting cloud/sun, e.g. a montmartre rooftop) the environment drifts *during* capture,
 so a robotic head can be **worse** than a quick chrome-ball grab. Motorized heads suit **stable light**
 (studio/interior/steady overcast); the **chrome ball** remains the fast outdoor grab.
 
