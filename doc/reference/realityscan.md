@@ -1,9 +1,9 @@
-# RealityCapture — Photogrammetry Reference
+# RealityScan — Photogrammetry Reference
 
 Reconstructing montmartre rooftop/street surfaces (colonized chimney/wall geometry) from images, to drive the
 lichen sim's `surface` VDB constraint in solved-camera space. Inputs: **frames developed from the ProRes RAW
 hero footage** (solo default; the XAVC S-I 4K S-Log3 safety stream is the fallback) + **dedicated 61 MP RAW
-stills** (planned, premium) — RC mixes both, as long as color is consistent.
+stills** (planned, premium) — RealityScan (formerly RealityCapture) mixes both, as long as color is consistent.
 
 ## Capture (for parallax)
 - Photogrammetry needs **translation / parallax** — *move around* the subject. A **pano** (fixed nodal point)
@@ -20,7 +20,7 @@ Export as **8-bit sRGB, full-range, no clipping**, every source through the *sam
 [camera-tracking.md](../pipeline/camera-tracking.md) §7 (Resolve route) or develop in Lightroom (below).
 
 ## Image develop (Lightroom)
-**Target, not identical sliders:** every frame → **neutral, no clipping, texture visible everywhere**. RC's
+**Target, not identical sliders:** every frame → **neutral, no clipping, texture visible everywhere**. RealityScan's
 feature matching is **brightness/contrast-robust** (normalized gradients + NCC) so it *tolerates* exposure
 variation between frames — but a **clipped highlight / crushed shadow = no data = hole** in the mesh. Clipping
 hurts precision far more than a tone difference.
@@ -29,11 +29,11 @@ hurts precision far more than a tone difference.
   one flat develop.
 - **Partition by lighting bucket only where the flat develop still clips/crushes** — recover those, converge
   every bucket to the same neutral output. Don't partition unnecessarily (adds photometric inconsistency).
-- **Lightroom recipe:** Adobe Neutral profile; **CA + vignetting ON**; **geometric distortion OFF** (RC solves
+- **Lightroom recipe:** Adobe Neutral profile; **CA + vignetting ON**; **geometric distortion OFF** (RealityScan solves
   it); Sharpening / Clarity / Texture / Dehaze **0**; minimal NR (don't smooth the stone/plaster grain — it's
   the subject); **no crop / transform / upright**. Develop one → **Sync** (Classic) or **Copy/Paste edit
   settings** (cloud) to all. **Cull soft frames** (reject flag).
-- **Export:** full size (no resize), **sRGB**, JPEG q90 or 16-bit TIFF, **keep EXIF** (RC reads focal length).
+- **Export:** full size (no resize), **sRGB**, JPEG q90 or 16-bit TIFF, **keep EXIF** (RealityScan reads focal length).
 - Lightroom **Classic** beats cloud for a big batch (local, export control, no forced upload).
 
 ## Reconstruction quality (high detail)
@@ -71,9 +71,10 @@ Run **Texture** (after the mesh) to unwrap UVs + bake the photo texture. Confirm
 texture in the 3D view before exporting.
 
 ## Export — gotchas
-- **License-gated:** must be **signed into Epic** inside RC (RC 1.4+ from the Epic Launcher; older PPI builds
-  need credits). Everything up to export is free; the write is what's gated.
-- In this setup **only Alembic (`.abc`) exports cleanly** — OBJ/USD failed (RC's USD texture export is
+- **License-gated:** must be **signed into Epic** inside RealityScan (formerly RealityCapture; free from the
+  Epic Games launcher when signed in — the legacy pay-per-input "PPI" builds needed credits). Everything up to
+  export is free; the write is what's gated.
+- In this setup **only Alembic (`.abc`) exports cleanly** — OBJ/USD failed (RealityScan's USD texture export is
   historically flaky).
 - Alembic carries **mesh + UVs but NOT the material/texture link** — the texture writes as a **separate image**
   alongside the `.abc`. Reconnect it to base-color in the Houdini MaterialX shader; it maps via the imported UVs.

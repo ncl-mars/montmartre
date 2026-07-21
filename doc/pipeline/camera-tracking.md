@@ -103,8 +103,9 @@ ACEScg plate
    right-click:
    - **Set Ground Plane → Selected** — lasso several **cobble tracks** (more = flatter; lays them on Y=0).
    - **Set Origin → Selected** — one ground track becomes world zero.
-   - **Set Distance** — select **exactly two** tracks, type a **real measurement** (convention: 1 unit = 1 m).
-     No `solve_dist` math needed — RC computes the scale factor.
+   - **Set Distance** (Nuke: Scene tab → **Add Scale Distance**) — select **exactly two** tracks, type a
+     **real measurement** (convention: 1 unit = 1 m). No `solve_dist` math needed — CameraTracker computes the
+     scale factor. See [Foundry — Using Scene Constraints](https://learn.foundry.com/nuke/content/comp_environment/cameratracker/creating_contraints.html).
 
    A monocular solve is **scale-free** — you *must* inject one real distance, and **on-site tape beats any
    standard**. Pick two **sharp, far-apart, tracked** features (window-frame corners), never soft plaster or
@@ -168,9 +169,9 @@ isn't needed for Nuke's line-based fit (only for a *metric* calibration in OpenC
 - **Scale note:** thin-filament radii hit Murray/allometric underflow at sub-mm scale. The sim scene is
   scaled up for the solve and back down after (no kernel changes). See `doc/lichen/todo.md`.
 
-**Aligning the RC scan to the solved camera.** Two independent solves start in different space + scale:
-- **Scale-match first** — the RC mesh (real-scaled from one on-site measurement) is the ruler; then fix
-  **axis / handedness** (RC up-axis ≠ Nuke Y-up), then rotate/translate to seat the point cloud on the mesh.
+**Aligning the RealityScan mesh to the solved camera.** Two independent solves start in different space + scale:
+- **Scale-match first** — the RealityScan mesh (real-scaled from one on-site measurement) is the ruler; then fix
+  **axis / handedness** (RealityScan up-axis ≠ Nuke Y-up), then rotate/translate to seat the point cloud on the mesh.
   Scale + orient the **parent** of the camera + cloud together (or use the CameraTracker coordinate tools, §3).
 - **Validate by projection** — project the plate through the solved camera onto the mesh: the texture must
   **stick** across the *whole* move (parallax reveals depth errors a single frame hides). Sliding = scale,
@@ -199,17 +200,17 @@ moves out of Nuke.
 
 ---
 
-## 7. Photogrammetry image prep (RealityCapture)
+## 7. Photogrammetry image prep (RealityScan, formerly RealityCapture)
 
-**Two input sources** feed RC, sometimes together on the same chimney:
+**Two input sources** feed RealityScan, sometimes together on the same chimney:
 - **Extracted video frames** — the default solo workflow (now): frames pulled from the **developed ProRes RAW**
   hero footage (or the **XAVC S-I 4K** S-Log3 safety stream), exported from Resolve. Lower res than stills,
   watch motion blur / rolling shutter — pick sharp frames.
 - **Dedicated on-site still shoot** — 61 MP RAW stills (planned, when not shooting alone). Higher quality.
-- **Both combined** — RC happily mixes resolutions/sources, but they **must share the same color/exposure**
+- **Both combined** — RealityScan happily mixes resolutions/sources, but they **must share the same color/exposure**
   so alignment and texturing stay consistent → run *every* source through the **same** transform below.
 
-All inputs must be **8-bit sRGB, display-referred, full-range, no clipping** — RC matches features by
+All inputs must be **8-bit sRGB, display-referred, full-range, no clipping** — RealityScan matches features by
 texture, so blown highlights / crushed shadows = lost geometry. Exported from Resolve (Deliver):
 
 - **Format:** JPEG 8-bit, Quality **Best**; Force sizing + debayer to highest quality.
