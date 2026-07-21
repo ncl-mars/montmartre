@@ -29,6 +29,8 @@ Project-specific workflow, shoot → delivery. Evolves per shot.
 - [project-structure.md](pipeline/project-structure.md) — canonical studio template layout + template-fork model
 - [montmartre-structure.md](pipeline/montmartre-structure.md) — the montmartre project instance (filled-in graph)
 - [camera-tracking.md](pipeline/camera-tracking.md) — matchmove of the digital plates + chimney photogrammetry
+- [scan-texture-cleanup.md](pipeline/scan-texture-cleanup.md) — cleaning photogrammetry scan textures (Copernicus + ONNX: LaMa inpaint, delight, super-res)
+- [onnx-tiling.md](pipeline/onnx-tiling.md) — tiling fixed-input ONNX models (512 LaMa) across large textures: overlap, feather, valid-crop
 - [film-emulation.md](pipeline/film-emulation.md) — filmic look on digital footage + CG (grain, halation, MTF…)
 - [lookdev-render.md](pipeline/lookdev-render.md) — shading in Houdini MaterialX → Karma XPU (Blender/Cycles = mood reference)
 - [color-management.md](pipeline/color-management.md) — ACES/OCIO across Houdini→Nuke→Resolve (shared config)
@@ -41,4 +43,6 @@ Static, reusable reference for the tools. Canonical.
 - [nuke-dev.md](reference/nuke-dev.md) — Nuke development notes
 - [blinkscript-specs.md](reference/blinkscript-specs.md) — BlinkScript language spec + gotchas
 - [resources.md](reference/resources.md) — capture/technique reference (HDRI capture, …)
-- [realitycapture.md](reference/realitycapture.md) — RealityCapture photogrammetry: quality settings, Alembic export, gotchas
+- [realityscan.md](reference/realityscan.md) — RealityScan (formerly RealityCapture) photogrammetry: quality settings, Alembic export, gotchas
+- [ml-copernicus.md](reference/ml-copernicus.md) — ML in Copernicus (H22): the ONNX/neural node surface + how it fits the practice
+- [onnx-inference.md](reference/onnx-inference.md) — ONNX Inference COP reference paper: node anatomy, constraints, task/model catalog + licences
