@@ -61,6 +61,22 @@ Resolve**, guaranteeing identical color across applications, artists, and episod
   the same ACES 2.0 views).
 - **Studio template**: forked per project; the per-project copy is canonical for that show.
 
+**Setting `$OCIO` in Houdini.** Houdini reads the config from the `OCIO` environment variable **at launch** —
+there is no UI field to pick a config, and if `OCIO` is unset it falls back to its bundled config (don't — §3).
+Scope it **per project via a launcher** so it follows the show, not the machine:
+
+```bat
+set JOB=D:\FLAT\SPEC\MONTMARTRE
+set OCIO=%JOB%\config\ocio\<config>.ocio
+"C:\Program Files\Side Effects Software\Houdini 22.0.xxx\bin\houdinifx.exe"
+```
+
+Ties `$OCIO` to `$JOB`, the same var Nuke and Resolve read. *Alternative:* a committed
+`$JOB/packages/*.json` with `{ "env": [ { "OCIO": "$JOB/config/ocio/<config>.ocio" } ] }` keeps the setting in
+the repo — but `OCIO` must exist before color-management init, so the launcher is the sure route. **Verify**
+the active config path in the color-management preference reads the committed `config/ocio/…`, not
+`…/houdini/ocio/`.
+
 ---
 
 ## 4. Digital plate input transform
